@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Kursfeedback Auswertung – Swiss-Ski Ausbildung &amp; Entwicklung</title>
+<style>
+  :root{
+    color-scheme: light;
+    /* Swiss-Ski Styleguide */
+    --red:#e3001b; --red-dark:#9d0012; --red-deep:#7a000e; --coral:#ef6a4b;
+    --salmon:#f5a58e; --salmon-light:#fbcdbd;
+    --paper:#faf3f1; --card:#ffffff;
+    --ink:#1c1214; --ink-soft:#6b5a5c; --ink-faint:#9a8a8c;
+    --line:#eedcd5; --line-soft:#f2e2dc; --tint:#fbe9e3;
+    --green:#238a52; --green-light:#e3f5ea;
+    --pos:#238a52; --neg:#e3001b;
+    /* Notenskala: 1 schlecht (rot) → 3 neutral (grau) → 5 gut (grün) */
+    --v1:#7a000e; --v2:#e3001b; --v3:#d5cdca; --v4:#7ccda4; --v5:#0b4526;
+    --radius:22px;
+    --shadow:0 6px 18px rgba(90,20,20,.08);
+    --page:
+      radial-gradient(90% 60% at 100% 100%, rgba(238,130,100,.55) 0%, rgba(238,130,100,0) 55%),
+      linear-gradient(200deg,#fdf6f3 0%,#faeee9 55%,#f7ddd2 100%);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    background:var(--page); background-attachment:fixed;
+    color:var(--ink); font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  /* Körnung aus dem Styleguide */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size:240px 240px;opacity:.20;mix-blend-mode:overlay;
+  }
+  .wrap{position:relative;z-index:3;max-width:1180px;margin:0 auto;padding:0 20px 72px}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;overflow:hidden;color:#fff;margin:22px 0 20px;
+    border-radius:28px;padding:26px 28px 24px;
+    background:
+      radial-gradient(120% 90% at 8% 30%, rgba(251,191,164,.75) 0%, rgba(249,180,154,0) 46%),
+      radial-gradient(110% 90% at 92% 100%, rgba(240,141,117,.85) 0%, rgba(240,141,117,0) 55%),
+      linear-gradient(150deg,#8f000f 0%,#c50016 32%,#e3001b 58%,#ef6a4b 88%,#f5a58e 100%);
+    box-shadow:0 18px 44px rgba(120,0,16,.28);
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size:240px 240px;opacity:.30;mix-blend-mode:overlay;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+    background:linear-gradient(to bottom, rgba(90,0,12,0) 32%, rgba(90,0,12,.34) 100%);
+  }
+  .hero > *{position:relative;z-index:3}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+  .ssk-logo{height:26px;width:auto;flex:none;opacity:.97}
+  .kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;opacity:.88}
+  .hero h1{margin-top:9px;font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.015em}
+  .hero h1 em{font-style:italic;font-weight:300;font-size:.68em;display:block;margin-top:2px}
+  .hero-live{margin-top:10px;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;line-height:1.4;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.16)}
+  .hero-live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.85}
+  .hero-live.ok::before{background:#9be3bb}
+  .hero-sub{margin-top:10px;font-size:13px;line-height:1.55;opacity:.9;max-width:62ch}
+  .hero-kpis{margin-top:22px;display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr 1fr;gap:10px}
+  @media(max-width:900px){.hero-kpis{grid-template-columns:1fr 1fr}}
+  .kpi{
+    background:linear-gradient(180deg, rgba(88,0,12,.20), rgba(88,0,12,.34));
+    border:1px solid rgba(255,255,255,.30);
+    border-radius:16px;padding:13px 15px;backdrop-filter:blur(6px);
+  }
+  .kpi .lab{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;opacity:.85}
+  .kpi .val{font-size:27px;font-weight:800;line-height:1.05;margin-top:5px;letter-spacing:-.02em}
+  .kpi.hero-num .val{font-size:46px}
+  .kpi .val small{font-size:.42em;font-weight:600;opacity:.7;letter-spacing:0}
+  .kpi .dlt{font-size:11px;opacity:.82;margin-top:5px;line-height:1.4}
+
+  /* ---------- CARDS ---------- */
+  section{
+    background:var(--card);border-radius:var(--radius);padding:22px 24px;
+    margin-bottom:16px;box-shadow:var(--shadow);
+  }
+  h2{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:var(--ink);margin-bottom:6px}
+  .note{color:var(--ink-soft);font-size:12.5px;line-height:1.55;margin-bottom:16px;max-width:88ch}
+  .note.tight{margin-bottom:11px}
+  .btn{
+    background:var(--card);border:1.5px solid var(--line);color:var(--ink-soft);
+    border-radius:99px;padding:7px 15px;font-size:12.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:all .15s;
+  }
+  .btn:hover{background:var(--tint);color:var(--red);border-color:rgba(227,0,27,.35)}
+  .btn.ghost{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.42);color:#fff}
+  .btn.ghost:hover{background:rgba(255,255,255,.26);color:#fff}
+
+  /* ---------- FILTER ---------- */
+  .filters{display:flex;flex-wrap:wrap;gap:18px 22px;align-items:flex-end}
+  .fgroup{display:flex;flex-direction:column;gap:8px}
+  .flabel{font-size:10.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--ink-faint);font-weight:800}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    background:var(--card);border:1.5px solid var(--line);color:var(--ink-soft);
+    border-radius:99px;padding:6px 13px;font-size:12.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s;
+  }
+  .chip:hover{border-color:rgba(227,0,27,.4);color:var(--red)}
+  .chip[aria-pressed="true"]{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 4px 12px rgba(227,0,27,.28)}
+  select{
+    appearance:none;border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+    border-radius:99px;padding:6px 34px 6px 14px;font-size:12.5px;font-weight:700;
+    font-family:inherit;outline:none;cursor:pointer;min-width:250px;max-width:340px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%236b5a5c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;
+  }
+  select:hover{border-color:rgba(227,0,27,.4)}
+  select:focus{border-color:var(--red)}
+  select.on{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 4px 12px rgba(227,0,27,.28);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center}
+
+  /* ---------- BALKEN ---------- */
+  .grp-label{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--ink-faint);margin:16px 0 6px}
+  .grp-label:first-child{margin-top:0}
+  .barrow{display:grid;grid-template-columns:var(--labw,230px) 1fr 74px;gap:12px;align-items:center;padding:3px 0}
+  .barrow .lab{font-size:13px;color:var(--ink-soft);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .barrow .lab.click{cursor:pointer;color:var(--ink);font-weight:600}
+  .barrow .lab.click:hover{color:var(--red)}
+  .track{
+    position:relative;height:22px;border-radius:3px;
+    background:linear-gradient(to right,var(--line-soft) 0 1px,transparent 1px) repeat-x;background-size:25% 100%;
+  }
+  .bar{height:15px;margin-top:3.5px;border-radius:0 4px 4px 0;min-width:2px;transition:width .3s cubic-bezier(.2,.7,.3,1)}
+  .bar.soft{opacity:.5}
+  .barval{font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:800}
+  .barval .n{color:var(--ink-faint);font-weight:600;font-size:11px}
+  .scaleaxis{display:grid;grid-template-columns:var(--labw,230px) 1fr 74px;gap:12px;margin-top:7px}
+  .scaleaxis .ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums;font-weight:700}
+
+  /* ---------- MATRIX ---------- */
+  .mx{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:3px;font-size:13px}
+  .mx th{
+    position:static;background:transparent;box-shadow:none;padding:4px 8px;
+    font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);
+    font-weight:800;cursor:default;text-align:center;border:none;
+  }
+  .mx th.rowhead,.mx td.rowhead{width:230px}
+  .mx th.rowhead{text-align:right}
+  .mx td{border:none;padding:0}
+  .mx td.rowhead{
+    text-align:right;font-size:13px;font-weight:600;color:var(--ink);
+    padding:0 10px 0 0;white-space:nowrap;
+  }
+  .cell{
+    border-radius:10px;padding:9px 6px;text-align:center;border:1px solid rgba(20,60,40,.14);
+    line-height:1.15;
+  }
+  .cell .v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;display:block}
+  .cell .n{font-size:10px;font-weight:600;opacity:.72;display:block;margin-top:2px}
+  .cell.empty{background:var(--paper);border-style:dashed;color:var(--ink-faint)}
+  .cell.delta{background:var(--paper);border-color:var(--line)}
+  .cell.delta .v{font-size:14px}
+  .cell.delta.up .v{color:var(--pos)}
+  .cell.delta.down .v{color:var(--neg)}
+  .cell.delta.flat .v{color:var(--ink-faint)}
+  .mxscale{display:flex;align-items:center;gap:7px;margin-top:14px;font-size:11px;color:var(--ink-faint);font-weight:700}
+  .mxscale i{width:15px;height:11px;border-radius:3px;display:block;border:1px solid rgba(20,60,40,.14)}
+
+  /* ---------- STREUDIAGRAMM ---------- */
+  .scatterwrap{width:100%;overflow:visible}
+  .scatterwrap svg{display:block;width:100%;height:auto;overflow:visible}
+  .sc-dot{cursor:pointer}
+  .sc-dot > *{stroke:var(--card);stroke-width:2}
+  .sc-dot:hover > *{stroke:var(--ink)}
+  .sc-key{fill:none;stroke:var(--ink-soft);stroke-width:1.6}
+  .sc-grid{stroke:var(--line-soft);stroke-width:1}
+  .sc-axis{stroke:var(--line);stroke-width:1}
+  .sc-ref{stroke:var(--ink-faint);stroke-width:1;opacity:.45}
+  .sc-tick{fill:var(--ink-faint);font-size:10.5px;font-weight:700}
+  .sc-axlab{fill:var(--ink-soft);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .sc-lab{fill:var(--ink);font-size:11px;font-weight:700}
+  .sc-lead{stroke:var(--ink-faint);stroke-width:1}
+  .sc-count{fill:var(--ink-faint);font-size:10px;font-weight:800}
+  .sc-reflab{fill:var(--ink-faint);font-size:10px;font-weight:700}
+
+  /* ---------- VERTEILUNG ---------- */
+  .stackrow{display:grid;grid-template-columns:var(--labw,230px) 1fr 74px;gap:12px;align-items:center;padding:5px 0}
+  .stack{display:flex;height:26px;border-radius:4px;overflow:hidden}
+  .seg{height:100%}
+  .seg + .seg{margin-left:2px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+  .legend .item{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink-soft);
+    background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:4px 11px 4px 7px;
+  }
+  .legend .item.click{cursor:pointer;font-family:inherit;transition:all .15s}
+  .legend .item.click:hover{border-color:rgba(227,0,27,.4);color:var(--red)}
+  .legend .item.click[aria-pressed="true"]{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 4px 12px rgba(227,0,27,.28)}
+  .legend .item.click[aria-pressed="true"] .sc-key{stroke:#fff}
+  .swatch{width:11px;height:11px;border-radius:4px;flex:none}
+
+  /* ---------- TABELLE ---------- */
+  .tablewrap{max-height:520px;overflow:auto;border:1.5px solid var(--line);border-radius:16px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-soft)}
+  th{
+    font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);font-weight:800;
+    cursor:pointer;white-space:nowrap;position:sticky;top:0;background:var(--card);z-index:2;
+    box-shadow:0 1.5px 0 var(--line);
+  }
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody tr:hover{background:var(--tint)}
+
+  /* ---------- KOMMENTARE ---------- */
+  .cmts{display:flex;flex-direction:column;gap:9px;max-height:560px;overflow:auto;padding-right:4px}
+  .cmt{
+    background:var(--paper);border:1px solid var(--line-soft);border-left:3.5px solid var(--ink-faint);
+    border-radius:16px;padding:11px 14px;
+  }
+  .cmt.positiv{border-left-color:var(--pos)}
+  .cmt.kritisch{border-left-color:var(--neg)}
+  .cmt .meta{font-size:10.5px;color:var(--ink-faint);margin-bottom:5px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .cmt .meta b{font-weight:800;color:var(--ink)}
+  .cmt .txt{font-size:13.5px;color:var(--ink);line-height:1.5}
+  .tag{
+    background:var(--tint);color:var(--red);border-radius:99px;padding:2px 9px;
+    font-size:10px;font-weight:800;letter-spacing:.02em;
+  }
+  .cmt.positiv .tag{background:var(--green-light);color:var(--green)}
+  .tag.plain{background:transparent;color:var(--ink-faint);border:1px solid var(--line);font-weight:700}
+
+  /* ---------- DIALOG ---------- */
+  dialog{
+    border:none;border-radius:26px;padding:0;max-width:840px;width:calc(100% - 32px);margin:auto;overflow:hidden;
+    background:var(--card);color:var(--ink);box-shadow:0 30px 70px rgba(60,0,10,.45);
+  }
+  dialog::backdrop{background:rgba(28,6,10,.55);backdrop-filter:blur(3px)}
+  .dlg-head{
+    position:relative;overflow:hidden;color:#fff;padding:22px 24px 20px;
+    background:linear-gradient(140deg,#8f000f 0%,#cf0018 45%,#e8452f 80%,#f0885f 115%);
+  }
+  .dlg-head > *{position:relative;z-index:3}
+  .dlg-head .row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  .dlg-head h3{font-size:22px;font-weight:800;letter-spacing:-.01em;margin-top:2px}
+  .dlg-head .s{font-size:12.5px;opacity:.9;margin-top:4px}
+  .pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+  .pill{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.34);border-radius:99px;padding:4px 11px;font-size:10.5px;font-weight:800;letter-spacing:.03em}
+  .dlg-body{padding:20px 24px 26px;max-height:66vh;overflow:auto}
+  .dlg-body h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--ink-faint);margin:20px 0 8px}
+
+  /* ---------- TOOLTIP ---------- */
+  #tip{
+    position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;z-index:99;
+    background:var(--ink);color:var(--paper);font-size:12px;line-height:1.45;font-weight:600;
+    padding:8px 11px;border-radius:12px;max-width:290px;box-shadow:0 8px 24px rgba(30,0,6,.35);
+  }
+  .empty{color:var(--ink-faint);font-size:13px;padding:14px 0;font-weight:600}
+  footer{color:var(--ink-soft);font-size:12.5px;line-height:1.65}
+  footer h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--red);margin:18px 0 6px}
+  footer b{color:var(--ink)}
+  footer a{color:var(--red);font-weight:700}
+  code{background:var(--tint);border-radius:6px;padding:2px 6px;font-size:11.5px;color:var(--red);font-weight:700}
+  .anim{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero anim">
+  <div class="hero-top">
+    <div>
+      <div class="kicker">Ausbildung &amp; Entwicklung · Kursjahre <span id="saisonrange"></span></div>
+      <h1>Kursfeedback<em>Auswertung</em></h1>
+    </div>
+    <svg class="ssk-logo" aria-label="Swiss-Ski" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-0.89671641 -0.89671641 136.68413282 31.68397982"> <path d="M 45.167373,4.5035962 44.854261,4.3440205 44.541148,4.2644718 44.306373,4.0253475 44.071676,3.7863028 43.915237,3.4673906 43.758563,3.1484785 l 0,-0.3984609 0.07834,-0.4782488 0.07834,-0.5579568 0.234775,-0.4782487 0.313034,-0.39870004 0.391215,-0.31867306 0.469551,-0.23912436 0.469551,-0.15957566 0.547809,-0.0795487 0.313112,0 0.391215,0.0795487 0.313112,0.15957566 0.234775,0.23912436 0.234776,0.23912436 0.15636,0.31891214 0.07841,0.3186731 0,0.3189122 0,0.5579568 -0.156751,0.5580366 -0.234698,0.4782487 -0.312877,0.3984609 -0.391449,0.3188325 -0.391214,0.2391243 -0.54781,0.1593366 -0.469551,0.079788 -0.391214,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 38.515322,29.531786 4.304139,-20.5645355 3.443374,0 -4.304139,20.5645355 -3.443374,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 28.106824,29.531786 -0.782428,-13.390884 -0.156674,-2.311616 0,-1.753578 -0.782585,1.833366 -1.095541,2.311615 -6.495534,13.311097 -2.347676,0 -0.313112,-20.5645355 2.347911,0 -0.07834,12.8328475 -0.07834,4.463655 0.860922,-1.992703 1.173878,-2.391164 6.260601,-12.9126355 2.504272,0 0.704327,12.9126355 0.07834,2.470952 0.07834,1.833366 0.704326,-1.833366 1.017361,-2.55074 5.477938,-12.8328475 2.347912,0 -8.999885,20.5645355 -2.426013,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 5.4119377,29.850699 -0.7826633,0 L 3.8469242,29.770911 3.1423629,29.611575 2.4381147,29.37245 1.7337882,28.974069 1.1077985,28.575369 0.5599107,28.017333 0.0903597,27.379747 0.0121012,27.22049 l 1.0956973,-1.036285 0.1564387,0.239125 0.3131123,0.558036 0.3912142,0.478169 0.469551,0.318673 0.5478095,0.318912 0.5478878,0.239125 0.6259897,0.07979 0.5478095,0.07979 0.7043265,0.07955 0.8609218,-0.07955 0.8607652,-0.239363 0.8609218,-0.318673 0.7043265,-0.558037 0.5476529,-0.557957 0.3131123,-0.39846 0.1565953,-0.3987 0.1564387,-0.398461 0.1565168,-0.398382 0.07826,-0.478248 0,-0.558037 -0.07826,-0.797081 L 9.8726722,22.677048 9.5596382,22.039224 9.168424,21.481506 8.6205362,20.923469 7.9945465,20.365433 6.6640737,19.329227 5.3336009,18.292942 4.785948,17.655357 4.2380602,17.0974 3.7685875,16.380027 3.3771384,15.662654 3.2206997,14.865572 3.064261,13.909075 3.142363,13.351118 3.2207,12.793321 3.3771387,12.235284 3.6119142,11.677248 3.8469245,11.199079 4.159802,10.800618 4.5511728,10.401918 4.942387,10.003457 5.3336012,9.6845446 5.803387,9.3657122 6.2728598,9.1265878 6.7424108,8.9672513 7.8379515,8.6483391 l 1.0956973,-0.079788 0.7042482,0 0.704326,0.079788 0.62599,0.1595756 0.704483,0.2391244 0.62599,0.3186731 0.547887,0.3987 0.469551,0.5577178 0.469473,0.558036 0.07834,0.159576 -1.095697,0.956418 -0.07834,-0.239045 -0.312878,-0.478249 -0.39137,-0.3987 -0.469551,-0.318912 -0.469551,-0.318673 -0.469551,-0.159575 -0.54781,-0.159337 -0.5478873,-0.079788 -0.5476529,0 -0.8609218,0.079788 -0.7826633,0.159337 -0.7824284,0.318912 -0.6261463,0.478248 -0.5478878,0.558037 -0.3912142,0.717293 -0.2347755,0.717373 -0.078337,0.478249 0,0.478169 0,0.637825 0.1566736,0.637585 0.2347755,0.557957 0.3912142,0.478248 0.391449,0.478249 0.547653,0.478249 1.1737992,1.036205 1.4869115,1.116073 0.7044831,0.637506 0.6259894,0.717373 0.547888,0.717373 0.391214,0.797081 0.156674,0.478249 0.15636,0.478249 0.07834,0.478169 0,0.558036 -0.07834,0.637825 -0.07826,0.637505 -0.156439,0.558037 -0.234776,0.558036 -0.313112,0.557798 -0.313112,0.478169 -0.391214,0.3987 -0.3912144,0.398461 -0.4697076,0.318912 -0.469551,0.318912 -0.5476529,0.318593 -0.5478878,0.159576 -0.5478095,0.239124 -0.5478878,0.07955 -0.6259897,0.07979 -0.5478095,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 52.366999,29.850699 -1.64335,0 -1.565249,-0.239124 -0.782428,-0.239125 -0.782663,-0.239044 -0.704248,-0.239125 -0.704327,-0.398461 1.799789,-3.905857 0.939102,0.558037 1.01736,0.398381 1.095698,0.318912 0.625989,0.07979 0.547888,0 0.547888,0 0.547653,-0.07979 0.469473,-0.159337 0.469786,-0.239044 0.391214,-0.239125 0.313034,-0.3987 0.156438,-0.478248 0.07834,-0.558037 0,-0.398381 -0.156595,-0.318912 -0.156517,-0.398461 -0.313034,-0.318912 -0.312877,-0.398461 -0.469786,-0.3987 -1.251901,-0.796842 -1.252215,-0.956737 -0.626146,-0.557718 -0.547653,-0.558036 -0.469707,-0.637824 -0.391293,-0.796843 -0.234776,-0.876948 -0.07826,-0.956418 0,-0.717373 0.156674,-0.717373 0.15636,-0.717294 0.234775,-0.637824 0.234776,-0.558036 0.391449,-0.637506 0.391214,-0.478249 0.469473,-0.478248 0.469551,-0.3987 0.626225,-0.3984614 0.625989,-0.3188324 0.704249,-0.3186731 0.704326,-0.2391244 0.782585,-0.1595756 0.861,-0.079788 0.860765,0 1.565249,0.079788 1.408574,0.2391243 0.704327,0.1595757 0.625989,0.2391244 0.704484,0.2391243 0.625989,0.3185934 -1.721687,3.7462818 -0.860765,-0.478169 -0.939259,-0.398461 -1.09554,-0.239124 -1.095698,-0.07979 -0.704326,0.07979 -0.62599,0.07955 -0.469472,0.239364 -0.39145,0.239124 -0.234775,0.318673 -0.234776,0.318833 -0.07834,0.318912 -0.0781,0.398461 0.0781,0.478248 0.23501,0.3987 0.234776,0.398382 0.312877,0.398461 0.860922,0.637824 0.782663,0.558036 1.408575,0.956418 0.704326,0.558037 0.54781,0.637585 0.547731,0.717293 0.391371,0.797161 0.156438,0.398461 0.156674,0.478169 0.0781,0.558037 0,0.558036 0,0.797081 -0.156439,0.797161 -0.234775,0.717373 -0.313112,0.637506 -0.313035,0.637824 -0.469551,0.557798 -0.46955,0.557957 -0.469552,0.478248 -0.625989,0.3987 -0.626147,0.398461 -0.625989,0.318912 -0.704327,0.239045 -0.626146,0.159337 -0.782663,0.159336 -0.704249,0.07979 -0.704326,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 68.175372,29.850699 -1.643585,0 -1.64335,-0.239124 -0.860766,-0.159337 -0.782585,-0.159576 -0.782663,-0.239044 -0.704326,-0.318673 1.878125,-5.021692 0.861,0.478249 1.017361,0.398461 1.017204,0.318912 1.01736,0.07979 0.547888,-0.07979 0.469551,0 0.469551,-0.159336 0.313034,-0.159576 0.313112,-0.159336 0.234776,-0.318913 0.156439,-0.318912 0,-0.398381 0,-0.239124 -0.07834,-0.318913 -0.234776,-0.239124 -0.234775,-0.239124 -0.704248,-0.558037 -1.095541,-0.717293 -1.174034,-0.87671 -0.62599,-0.558036 -0.469551,-0.557957 -0.469472,-0.637585 -0.39145,-0.717374 -0.234775,-0.797081 -0.0781,-0.956497 0.0781,-0.876869 0.07834,-0.797161 0.234775,-0.796842 0.234776,-0.717373 0.391136,-0.637825 0.391449,-0.637505 0.469551,-0.558037 0.547887,-0.478248 0.547575,-0.478249 0.704561,-0.3987002 0.704327,-0.3185933 0.704248,-0.2391244 0.782663,-0.2391244 0.860766,-0.1595756 0.860921,-0.079788 0.860766,0 1.721687,0.079788 1.565248,0.1595756 1.565013,0.3984609 1.486912,0.478169 -1.878126,4.8621154 -0.860765,-0.478248 -0.939259,-0.398461 -1.095462,-0.318833 -1.095776,-0.07955 -0.547809,0.07955 -0.469551,0.07979 -0.391214,0.159257 -0.313113,0.159575 -0.156438,0.239125 -0.234697,0.239124 -0.07834,0.239125 0,0.239124 0.07834,0.398461 0.07826,0.318912 0.234775,0.239045 0.312878,0.318912 0.782663,0.557797 0.860922,0.558037 1.330316,0.876869 0.626146,0.558036 0.547653,0.637586 0.469708,0.637505 0.391292,0.797161 0.234776,0.876949 0.07826,0.478169 0.0781,0.478249 -0.0781,0.956497 -0.156595,0.87663 -0.234775,0.797161 -0.312956,0.797081 -0.391371,0.637824 -0.547888,0.637586 -0.469472,0.557956 -0.62599,0.478249 -0.626225,0.398461 -0.704248,0.3987 -0.782663,0.239124 -0.704327,0.239045 -0.782585,0.239124 -0.860765,0.07955 -0.782585,0.07979 -0.860765,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 112.70442,29.531786 -2.66079,-7.332988 -1.1738,1.673791 0,5.659197 -8.37374,0 0,-28.6949232 8.37374,0 0,14.9055782 3.99103,-7.1738906 9.93898,0 -6.02606,8.5288486 6.1825,12.434387 -10.25186,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 87.505182,29.850699 -1.721687,0 -1.721687,-0.159337 -1.721687,-0.239124 -1.64335,-0.39862 1.017125,-5.659197 1.017361,0.398381 1.174112,0.239125 1.095463,0.239124 1.173877,0.07979 0.469473,-0.07979 0.391449,0 0.312877,-0.159337 0.313113,-0.159336 0.234775,-0.159576 0.156674,-0.159336 0.0781,-0.239045 0.07834,-0.318912 -0.07834,-0.318673 -0.0781,-0.239125 -0.156674,-0.239363 -0.234775,-0.159337 -0.547888,-0.318912 -0.547575,-0.159336 -1.486989,-0.478169 -0.782585,-0.318913 -0.782664,-0.39846 -0.782663,-0.558037 -0.625912,-0.637506 -0.547887,-0.717373 -0.391214,-0.876948 -0.156674,-0.478169 -0.156439,-0.478249 -0.07834,-0.558037 0,-0.558036 0,-0.796842 0.156752,-0.717612 0.156361,-0.717294 0.313112,-0.717373 0.312877,-0.637585 0.469786,-0.637745 0.469551,-0.557797 0.547575,-0.558037 0.704561,-0.4781688 0.704327,-0.3987 0.78235,-0.3186731 0.861,-0.3189122 0.939024,-0.2391244 0.939102,-0.1595756 1.095697,-0.1593365 1.095541,0 1.565248,0.079788 1.64335,0.1593365 1.64335,0.2391244 1.721687,0.3189122 -0.939023,5.2607355 -1.095541,-0.318912 -1.173799,-0.239124 -1.095776,-0.159257 -1.252136,-0.07979 -0.704326,0.07979 -0.313034,0.159257 -0.234776,0.07979 -0.156439,0.159337 -0.156438,0.239124 0,0.159337 -0.07834,0.239124 0.07834,0.239364 0.0781,0.239124 0.234775,0.318673 0.469473,0.239045 0.469551,0.239124 1.330551,0.3987 1.017361,0.398461 1.017438,0.3987 0.860687,0.557718 0.782663,0.558036 0.391136,0.3987 0.313113,0.318673 0.234775,0.478249 0.234776,0.39862 0.156673,0.478249 0.156439,0.558037 0.07834,0.557797 0,0.637745 0,0.956497 -0.156674,0.87663 -0.234775,0.876949 -0.313113,0.717293 -0.469551,0.717373 -0.469472,0.637825 -0.547653,0.637505 -0.626225,0.478249 -0.704248,0.478249 -0.782663,0.3987 -0.860687,0.398461 -0.861,0.239044 -0.939102,0.239125 -1.017361,0.159336 -1.017439,0.07979 -1.095462,0 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 129.1387,7.2136723 -0.93902,-0.2391244 -0.78267,-0.2391243 -0.70425,-0.4782487 -0.54788,-0.4781691 -0.39145,-0.6378243 -0.23478,-0.7173731 -0.0781,-0.7172934 0,-0.7173731 0.23478,-0.6378243 0.39121,-0.6375056 0.46955,-0.5580365 0.70425,-0.47824875 0.78266,-0.31891219 1.01736,-0.23912436 1.09578,-0.0795487 1.09546,0.0795487 0.9391,0.15957566 0.78259,0.31867306 0.70432,0.47848788 0.46956,0.4782487 0.39144,0.6375055 0.23478,0.7173731 0.078,0.7971609 -0.078,0.7970812 -0.23478,0.7173731 -0.39144,0.5580365 -0.54789,0.5577178 -0.70433,0.3987 -0.78235,0.3189122 -0.93934,0.1593365 -1.01712,0.079788 -1.01744,-0.079788 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" /> <path d="m 125.625,8.5625077 0,20.9687503 9.0625,0 0,-20.9687503 z" style="fill:#ffffff;fill-opacity:0;stroke:none" /> <path d="m 125.625,8.5625077 0,20.9687503 9.0625,0 0,-7 -1.09375,0 0,2.6875 -2.34375,0 0,-2.6875 -2.65625,0 0,-2.3125 2.65625,0 0,-2.71875 2.34375,0 0,2.71875 1.09375,0 0,-11.6562503 -9.0625,0 z" style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.07897998;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:0;stroke-dasharray:none" /> </svg>
+  </div>
+  <p class="hero-sub">Alle Rückmeldungen aus den Feedbackbögen der Aus- und Weiterbildungskurse, zusammengeführt aus dem SharePoint-Ordner <em>02_ Feedback alle Kurse</em>. Notenskala 1–5, 5 = bestes; die Farbskala ist auf der ganzen Seite gleich – 1 rot, 3 neutral, 5 grün. Stand <span id="stand"></span>.</p>
+  <p class="hero-live" id="livestatus" hidden></p>
+  <div class="hero-kpis" id="kpis"></div>
+</header>
+
+<section class="anim">
+  <h2>Filter</h2>
+  <p class="note tight">Alle Kennzahlen, Diagramme und Kommentare richten sich nach dieser Auswahl.</p>
+  <div class="filters">
+    <div class="fgroup"><span class="flabel">Kursjahr</span><div class="chips" id="f-saison"></div></div>
+    <div class="fgroup"><span class="flabel">Sportart</span><div class="chips" id="f-sportart"></div></div>
+    <div class="fgroup"><span class="flabel">Kurs</span><select id="f-kurs"></select></div>
+    <div class="fgroup"><span class="flabel">&nbsp;</span><button class="btn" id="reset">Zurücksetzen</button></div>
+  </div>
+</section>
+
+<section class="anim">
+  <h2>Alle Kurse auf einen Blick</h2>
+  <p class="note tight">Ein Punkt je Kurs: waagrecht die Gesamtnote, senkrecht die Zahl der Rückmeldungen. Die grauen Linien markieren den Durchschnitt aller gefilterten Kurse und den Median der Rückmeldungen – Punkte links unten sind schwach bewertet <em>und</em> dünn belegt, Punkte links oben sind schwach bewertet bei guter Datenlage. Klick auf einen Punkt öffnet die Detailauswertung. Liegen mehrere Kurse fast übereinander, steht ein <b>×n</b> daneben und der Tooltip listet die verdeckten Kurse mit auf.</p>
+  <div class="legend" id="l-scatter"></div>
+  <div class="scatterwrap" id="c-scatter"></div>
+</section>
+
+<section class="anim">
+  <h2>Jahresvergleich</h2>
+  <p class="note tight">Gewichtete Gesamtnote je Gruppe und Kursjahr. Die Spalte <b>Δ</b> zeigt die Veränderung vom ersten zum letzten Kursjahr in Notenpunkten. <b>n</b> = Anzahl Rückmeldungen, die in den Wert eingehen – bei einstelligen Zahlen ist eine Veränderung nicht aussagekräftig.</p>
+  <div class="chips" id="mxopts" style="margin-bottom:16px"></div>
+  <div style="overflow-x:auto"><table class="mx" id="c-matrix"></table></div>
+  <div class="mxscale" id="mxscale"></div>
+</section>
+
+<section class="anim">
+  <h2>Bewertungsdimensionen</h2>
+  <p class="note">Gewichteter Mittelwert über alle gefilterten Kurse (nach Anzahl Rückmeldungen). Die drei Standarddimensionen und die Frage zur Kursleitung erscheinen in fast jedem Fragebogen, die Detailfragen zur Organisation nur in einem Teil davon.</p>
+  <div id="c-dims"></div>
+</section>
+
+<section class="anim">
+  <h2>Notenverteilung</h2>
+  <p class="note tight">Anteil aller abgegebenen Einzelbewertungen je Note – zeigt, wie breit die Zustimmung streut.</p>
+  <div class="legend" id="l-verteilung"></div>
+  <div id="c-verteilung"></div>
+</section>
+
+<section class="anim">
+  <h2>Kurse im Vergleich</h2>
+  <p class="note tight">Gesamtnote je Kurs (Mittel über alle bewerteten Fragen, gewichtet nach Rückmeldungen). Klick auf einen Kursnamen öffnet die Detailauswertung. Blasse Balken mit ⚠ = weniger als 10 Rückmeldungen.</p>
+  <div class="chips" id="sortopts" style="margin-bottom:8px"></div>
+  <p class="note tight" id="sorthint" style="min-height:0"></p>
+  <div id="c-kurse"></div>
+</section>
+
+<section class="anim" id="sec-kommentare">
+  <h2>Kommentare</h2>
+  <p class="note tight">Wortlaut aus den Feedbackbögen, anonymisiert.</p>
+  <div class="filters" style="margin-bottom:16px">
+    <div class="fgroup"><span class="flabel">Tonalität</span><div class="chips" id="f-ton"></div></div>
+    <div class="fgroup"><span class="flabel">Thema</span><div class="chips" id="f-thema"></div></div>
+  </div>
+  <div class="cmts" id="c-kommentare"></div>
+</section>
+
+<section class="anim">
+  <h2>Datentabelle</h2>
+  <p class="note tight">Alle Kennzahlen je Kurs – Spaltenkopf klicken zum Sortieren.</p>
+  <div class="tablewrap"><table id="t-kurse"><thead></thead><tbody></tbody></table></div>
+  <div style="margin-top:14px"><button class="btn" id="csv">Als CSV herunterladen</button></div>
+</section>
+
+<section class="anim">
+  <footer>
+    <h2 style="color:var(--ink)">Methodik &amp; Fortschreibung</h2>
+    <h4>Datenbasis</h4>
+    Ausgewertet werden alle Excel-Feedbackdateien aus den Jahresordnern unterhalb von
+    <code>Admin / 02_ Feedback alle Kurse</code>. Aus jeder Datei werden die Bewertungszeilen (ohne die
+    in den Dateien enthaltenen Mittelwert-Zeilen) sowie sämtliche Freitextkommentare übernommen.
+    Namen und E-Mail-Adressen der Teilnehmenden werden nicht ausgewertet.
+    <h4>Kennzahlen</h4>
+    <b>Gesamtnote</b> = Mittelwert über alle bewerteten Fragen eines Kurses, gewichtet mit der Zahl gültiger Antworten je Frage.
+    Aggregate über mehrere Kurse sind mit der Zahl der Rückmeldungen gewichtet, damit grosse Kurse nicht gleich zählen wie ein Kurs mit drei Rückmeldungen.
+    <b>Anteil kritisch</b> = Anteil aller Einzelbewertungen mit Note 1 oder 2.
+    Die Fragebögen sind nicht identisch aufgebaut: Vergleiche zwischen Kursen beziehen sich auf unterschiedliche Fragensets und sind als Orientierung, nicht als exakte Rangliste zu lesen.
+    <h4>Sportarten</h4>
+    <b>Freestyle Style</b> sind die Park-&amp;-Pipe-Kurse (Slope, Kicker, Box/Rail, Halfpipe) – teils gemeinsam für Freeski und Snowboard. Das Gegenstück <em>Freestyle Speed</em> (Skicross/Snowboardcross) kommt dazu, sobald ein solcher Kurs ausgewertet wird.
+    <b>Snowboard Allround</b> sind die J+S-Technik-Allround-Kurse mit Carving, Renntechnik <em>und</em> Park-Elementen – also nicht Snowboard Alpin.
+    <h4>Neues Kursjahr ergänzen</h4>
+    Neuen Jahresordner (z.&nbsp;B. <code>2027-28_Kurse</code>) im gleichen Stil in SharePoint ablegen und die Feedbackdateien darin sammeln –
+    die Auswertung liest die Ordner als weiteres Kursjahr ein und ergänzt Filter, Vergleiche und Zeitreihen automatisch.
+    Das Dashboard muss dafür lediglich neu erzeugt werden.
+    <h4>Quelle</h4>
+    <a href="https://swissski.sharepoint.com/sites/O-AusbildungEntwicklung/Freigegebene%20Dokumente/Forms/AllItems.aspx?id=%2Fsites%2FO%2DAusbildungEntwicklung%2FFreigegebene%20Dokumente%2FAdmin%2F02%5F%20Feedback%20alle%20Kurse">SharePoint · 02_ Feedback alle Kurse</a>
+  </footer>
+</section>
+
+</div>
+
+<dialog id="detail">
+  <div class="dlg-head">
+    <div class="row"><div id="dlg-title"></div><button class="btn ghost" id="dlg-close">Schliessen</button></div>
+  </div>
+  <div class="dlg-body" id="dlg-body"></div>
+</dialog>
+<div id="tip"></div>
+
+<script>
+// Lokal ist der Datensatz eingebettet. Auf claude.ai (Artifact) ist der Platzhalter null und
+// die Kurse kommen live aus der Datenbank der Seite (Sammlung "kurse", Dokument "meta/stand").
+let DATA = {"meta":{"quelle":"SharePoint: O-AusbildungEntwicklung / Admin / 02_ Feedback alle Kurse","kurse_total":40,"antworten_total":742,"saisons":["2025/26","2026/27"],"kategorien":["Athlet:innen","J+S","Leiterkurs","NLZ-Day","Nordic Days","RTA","SWSK","Sonstige"],"sportarten":["Biathlon","Freestyle Style","Langlauf","Nordisch","Ski Alpin","Skispringen","Snowboard Allround","sportartübergreifend"],"skala":"1–5 (5 = bestes)","oeffentlich":true},"je_saison":{"2025/26":{"kurse":19,"antworten":364,"bewertungen":3771,"gesamt":4.31,"anteil_kritisch":3.1},"2026/27":{"kurse":21,"antworten":378,"bewertungen":4438,"gesamt":4.32,"anteil_kritisch":2.8}},"kurse":[{"id":"Feedback_Athlet_innen_Kurs_Ski_Alpin_2026","kurs":"Athlet:innen Kurs Ski Alpin","kurs_code":null,"datum_text":null,"saison":"2025/26","kategorie":"Athlet:innen","sportart":"Ski Alpin","n_antworten":23,"gesamt":4.16,"score_kern":4.43,"score_modul":3.78,"score_orga":4.51,"anteil_kritisch":4.0,"anteil_top":42.3,"hinweise":"Datei enthält Hinweis \"Notenskala: 1-5\". Die beiden Mittelwertzeilen (AVERAGE- und ROUND-Formeln) wurden nicht als Antworten gezählt. Freitexte stehen als separate Blöcke unterhalb der Rohdaten.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.39,"n":23,"verteilung":{"1":0,"2":1,"3":1,"4":9,"5":12}},{"name":"Methodik","typ":"kern","mittelwert":4.3,"n":23,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":9}},{"name":"Fachlich","typ":"kern","mittelwert":4.61,"n":23,"verteilung":{"1":0,"2":0,"3":0,"4":9,"5":14}},{"name":"Technik","typ":"modul","mittelwert":3.65,"n":23,"verteilung":{"1":0,"2":2,"3":8,"4":9,"5":4}},{"name":"Methodik","typ":"modul","mittelwert":4.04,"n":23,"verteilung":{"1":0,"2":1,"3":5,"4":9,"5":8}},{"name":"Kurssetzen","typ":"modul","mittelwert":4.04,"n":23,"verteilung":{"1":0,"2":1,"3":4,"4":11,"5":7}},{"name":"Racing Basics","typ":"modul","mittelwert":3.65,"n":23,"verteilung":{"1":0,"2":0,"3":12,"4":7,"5":4}},{"name":"Prüfungen","typ":"modul","mittelwert":3.52,"n":23,"verteilung":{"1":2,"2":1,"3":7,"4":9,"5":4}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.39,"n":23,"verteilung":{"1":0,"2":1,"3":3,"4":5,"5":14}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.57,"n":23,"verteilung":{"1":0,"2":0,"3":2,"4":6,"5":15}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.57,"n":23,"verteilung":{"1":0,"2":1,"3":1,"4":5,"5":16}}],"kommentare":[]},{"id":"Feedback_Athlet_innen_Kurs_Freestyle_2026","kurs":"Athlet:innen Kurs Snowboard und Ski Freestyle","kurs_code":null,"datum_text":null,"saison":"2025/26","kategorie":"Athlet:innen","sportart":"Freestyle Style","n_antworten":10,"gesamt":4.67,"score_kern":4.83,"score_modul":4.37,"score_orga":4.8,"anteil_kritisch":0.0,"anteil_top":72.2,"hinweise":"Kurs umfasst laut Titelzeile Snowboard und Ski Freestyle. Mittelwertzeile (Zeile 13, AVERAGE-Formeln) wurde nicht als Antwort gezählt. Hinweis in der Datei: von 18 Teilnehmer:innen haben 10 an der Umfrage teilgenommen. Nur eine Freitextspalte (Organisation/Sonstiges) vorhanden.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.9,"n":10,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":9}},{"name":"Methodik","typ":"kern","mittelwert":4.8,"n":10,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":8}},{"name":"Fachlich","typ":"kern","mittelwert":4.8,"n":10,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":8}},{"name":"Praxis On-Snow","typ":"modul","mittelwert":4.7,"n":10,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":8}},{"name":"Praxis Off-Snow","typ":"modul","mittelwert":4.0,"n":10,"verteilung":{"1":0,"2":0,"3":2,"4":6,"5":2}},{"name":"Theorie","typ":"modul","mittelwert":4.4,"n":10,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":5}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.7,"n":10,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":8}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.8,"n":10,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":8}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.9,"n":10,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":9}}],"kommentare":[]},{"id":"Feedback_TeAllround_JS-CH_209472_Ski","kurs":"TeAllround","kurs_code":"JS-CH 209472","datum_text":null,"saison":"2025/26","kategorie":"J+S","sportart":"Ski Alpin","n_antworten":31,"gesamt":4.26,"score_kern":4.7,"score_modul":3.98,"score_orga":4.46,"anteil_kritisch":4.5,"anteil_top":47.9,"hinweise":"Blatt 'Auswertung TeAll 209472'; Rohzeilen ohne Kopfspalten (ID/Zeit/E-Mail/Name entfernt). Hinweis in Datei: '31/48 haben Rückmeldung gegeben', 'Notenskala 1-5'. Mittelwert- und Rundungszeile (Zeilen 33/34) nicht als Antwort gezählt. Weitere Blätter enthalten nur Prozent-Grafiken.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.65,"n":31,"verteilung":{"1":0,"2":0,"3":4,"4":3,"5":24}},{"name":"Methodik","typ":"kern","mittelwert":4.61,"n":31,"verteilung":{"1":0,"2":0,"3":0,"4":12,"5":19}},{"name":"Fachlich","typ":"kern","mittelwert":4.84,"n":31,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":26}},{"name":"1. Meine Rolle als Leiter(-in) verstehen","typ":"modul","mittelwert":3.55,"n":31,"verteilung":{"1":1,"2":3,"3":9,"4":14,"5":4}},{"name":"2. Technische Modelle / Biomechanik","typ":"modul","mittelwert":4.19,"n":31,"verteilung":{"1":0,"2":0,"3":5,"4":15,"5":11}},{"name":"3. Persönliche technische Fortschritte","typ":"modul","mittelwert":4.32,"n":31,"verteilung":{"1":0,"2":0,"3":3,"4":15,"5":13}},{"name":"4. Workshops","typ":"modul","mittelwert":4.48,"n":31,"verteilung":{"1":0,"2":1,"3":2,"4":9,"5":19}},{"name":"5. Verständnis der Sicherheitsdimensionen","typ":"modul","mittelwert":3.39,"n":31,"verteilung":{"1":1,"2":4,"3":10,"4":14,"5":2}},{"name":"6. Übertragung zum Unterrichten","typ":"modul","mittelwert":4.0,"n":31,"verteilung":{"1":0,"2":1,"3":5,"4":18,"5":7}},{"name":"7. Erweiterung des Übungskatalogs","typ":"modul","mittelwert":3.9,"n":31,"verteilung":{"1":0,"2":5,"3":6,"4":7,"5":13}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.26,"n":31,"verteilung":{"1":0,"2":1,"3":4,"4":12,"5":14}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.48,"n":31,"verteilung":{"1":0,"2":1,"3":2,"4":9,"5":19}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.65,"n":31,"verteilung":{"1":0,"2":0,"3":2,"4":7,"5":22}}],"kommentare":[]},{"id":"Feedback_TeAllround_JS-CH_209864_Ski","kurs":"TeAllround","kurs_code":"JS-CH 209864","datum_text":null,"saison":"2025/26","kategorie":"J+S","sportart":"Ski Alpin","n_antworten":22,"gesamt":4.35,"score_kern":4.8,"score_modul":4.04,"score_orga":4.59,"anteil_kritisch":2.4,"anteil_top":51.0,"hinweise":"Microsoft-Forms-Export (Sheet1), Antworten anonym. Hinweis in Datei: 'Von 39 TN haben 22 das Feedback ausgefüllt'. Mittelwert-/Rundungszeile (Zeilen 24/25) nicht als Antwort gezählt. Kein Kursdatum in der Datei; Antworten datiert 13./14.03.2026.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.77,"n":22,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":17}},{"name":"Methodik","typ":"kern","mittelwert":4.73,"n":22,"verteilung":{"1":0,"2":0,"3":0,"4":6,"5":16}},{"name":"Fachlich","typ":"kern","mittelwert":4.91,"n":22,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":20}},{"name":"1. Meine Rolle als Leiter(-in) verstehen","typ":"modul","mittelwert":4.0,"n":22,"verteilung":{"1":0,"2":1,"3":2,"4":15,"5":4}},{"name":"2. Technische Modelle / Biomechanik","typ":"modul","mittelwert":4.27,"n":22,"verteilung":{"1":1,"2":0,"3":1,"4":10,"5":10}},{"name":"3. Persönliche technische Fortschritte","typ":"modul","mittelwert":4.18,"n":22,"verteilung":{"1":1,"2":0,"3":1,"4":12,"5":8}},{"name":"4. Workshops","typ":"modul","mittelwert":4.41,"n":22,"verteilung":{"1":0,"2":0,"3":3,"4":7,"5":12}},{"name":"5. Verständnis der Sicherheitsdimensionen","typ":"modul","mittelwert":3.41,"n":22,"verteilung":{"1":0,"2":2,"3":10,"4":9,"5":1}},{"name":"6. Übertragung zum Unterrichten","typ":"modul","mittelwert":4.09,"n":22,"verteilung":{"1":0,"2":0,"3":4,"4":12,"5":6}},{"name":"7. Erweiterung des Übungskatalogs","typ":"modul","mittelwert":3.95,"n":22,"verteilung":{"1":0,"2":1,"3":6,"4":8,"5":7}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.41,"n":22,"verteilung":{"1":0,"2":1,"3":1,"4":8,"5":12}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.68,"n":22,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":17}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.68,"n":22,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":16}}],"kommentare":[]},{"id":"Feedback_TeAllround_1.Teil_JS-CH_209845_SB","kurs":"Technik Allround 1. Teil","kurs_code":"JS-CH 209845","datum_text":"08.-13. Februar 2026","saison":"2025/26","kategorie":"J+S","sportart":"Snowboard Allround","n_antworten":9,"gesamt":4.45,"score_kern":4.89,"score_modul":4.18,"score_orga":4.93,"anteil_kritisch":4.9,"anteil_top":63.2,"hinweise":"Zwei Blätter: 'Sheet1' mit den Rohdaten (9 Antworten, hier ausgewertet) und 'Feedbach Auswertung' mit reinen Aggregaten/Grafiken. Angaben in der Datei: Kursort Andermatt, 08.-13. Februar 2026, 'Notenskala von 1-5', 9 von 23 Teilnehmer:innen haben geantwortet. Spalten ID/Startzeit/Fertigstellungszeit/E-Mail/Name/Zeitpunkt der letzten Änderung wurden ignoriert. Tiefste Werte: Renntechnik 3.78 sowie Defizitorientierte Theorie, Grundlage Grundposition und Slope Tricks je 3.89.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.89,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":8}},{"name":"Methodik","typ":"kern","mittelwert":4.78,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":7}},{"name":"Fachlich","typ":"kern","mittelwert":5.0,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":9}},{"name":"Defizitorientierte Theorie","typ":"modul","mittelwert":3.89,"n":9,"verteilung":{"1":0,"2":1,"3":1,"4":5,"5":2}},{"name":"Grundlage Grundposition","typ":"modul","mittelwert":3.89,"n":9,"verteilung":{"1":1,"2":0,"3":2,"4":2,"5":4}},{"name":"Carving","typ":"modul","mittelwert":4.11,"n":9,"verteilung":{"1":0,"2":0,"3":2,"4":4,"5":3}},{"name":"Slope Tricks","typ":"modul","mittelwert":3.89,"n":9,"verteilung":{"1":0,"2":2,"3":0,"4":4,"5":3}},{"name":"Straight Air","typ":"modul","mittelwert":4.33,"n":9,"verteilung":{"1":0,"2":0,"3":2,"4":2,"5":5}},{"name":"Box","typ":"modul","mittelwert":4.78,"n":9,"verteilung":{"1":0,"2":0,"3":1,"4":0,"5":8}},{"name":"Spins","typ":"modul","mittelwert":4.33,"n":9,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":4}},{"name":"Renntechnik","typ":"modul","mittelwert":3.78,"n":9,"verteilung":{"1":1,"2":1,"3":0,"4":4,"5":3}},{"name":"Kurzschwung","typ":"modul","mittelwert":4.78,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":7}},{"name":"Workshop Schneesport","typ":"modul","mittelwert":4.0,"n":9,"verteilung":{"1":0,"2":1,"3":1,"4":4,"5":3}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.89,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":8}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.89,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":8}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":5.0,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":9}}],"kommentare":[]},{"id":"Feedback_TeAllround_1._Teil_JS-CH_209861_SB","kurs":"Technik Allround 1. Teil","kurs_code":"JS-CH 209861","datum_text":null,"saison":"2025/26","kategorie":"J+S","sportart":"Snowboard Allround","n_antworten":28,"gesamt":4.4,"score_kern":4.51,"score_modul":4.3,"score_orga":4.62,"anteil_kritisch":0.9,"anteil_top":52.9,"hinweise":"Vermerke in der Datei: '28/31 Kursfeedback ausgefüllt' und 'Notenskala 1-5'. 28 Rohzeilen; Mittelwert- und Rundungszeile ausgeschlossen. Kein Kursdatum in der Datei. Häufigste Kritikpunkte: Verpflegung (zu wenig Proteine/vegetarische Optionen, Mittagsmenüs), Kosten/Zugang SnowHow, Wunsch nach einer Girls-Only-Gruppe. Tiefster Wert: Renntechnik 3.93.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.75,"n":28,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":22}},{"name":"Methodik","typ":"kern","mittelwert":4.18,"n":28,"verteilung":{"1":0,"2":1,"3":2,"4":16,"5":9}},{"name":"Fachlich","typ":"kern","mittelwert":4.61,"n":28,"verteilung":{"1":0,"2":0,"3":1,"4":9,"5":18}},{"name":"Defizitorientierte Theorie","typ":"modul","mittelwert":4.14,"n":28,"verteilung":{"1":0,"2":0,"3":3,"4":18,"5":7}},{"name":"Grundlage Grundposition","typ":"modul","mittelwert":4.18,"n":28,"verteilung":{"1":0,"2":0,"3":7,"4":9,"5":12}},{"name":"Carving","typ":"modul","mittelwert":4.29,"n":28,"verteilung":{"1":0,"2":0,"3":3,"4":14,"5":11}},{"name":"Slope Tricks","typ":"modul","mittelwert":4.14,"n":28,"verteilung":{"1":0,"2":0,"3":6,"4":12,"5":10}},{"name":"Straight Air","typ":"modul","mittelwert":4.64,"n":28,"verteilung":{"1":0,"2":0,"3":1,"4":8,"5":19}},{"name":"Box","typ":"modul","mittelwert":4.5,"n":28,"verteilung":{"1":0,"2":1,"3":3,"4":5,"5":19}},{"name":"Spins","typ":"modul","mittelwert":4.43,"n":28,"verteilung":{"1":0,"2":1,"3":2,"4":9,"5":16}},{"name":"Renntechnik","typ":"modul","mittelwert":3.93,"n":28,"verteilung":{"1":0,"2":1,"3":8,"4":11,"5":8}},{"name":"Kurzschwung","typ":"modul","mittelwert":4.32,"n":28,"verteilung":{"1":0,"2":0,"3":5,"4":9,"5":14}},{"name":"Workshop Schneesport","typ":"modul","mittelwert":4.46,"n":28,"verteilung":{"1":0,"2":0,"3":3,"4":9,"5":16}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.71,"n":28,"verteilung":{"1":0,"2":0,"3":0,"4":8,"5":20}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.36,"n":28,"verteilung":{"1":0,"2":0,"3":4,"4":10,"5":14}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.79,"n":28,"verteilung":{"1":0,"2":0,"3":0,"4":6,"5":22}}],"kommentare":[]},{"id":"Feedback_TeAllround_JS-CH209849_Ski","kurs":"Technik Allround 1. Teil","kurs_code":"JS-CH 209849","datum_text":null,"saison":"2025/26","kategorie":"J+S","sportart":"Ski Alpin","n_antworten":21,"gesamt":4.51,"score_kern":4.62,"score_modul":4.38,"score_orga":4.7,"anteil_kritisch":0.4,"anteil_top":59.3,"hinweise":"Formular nur auf FR/IT vorhanden; Dimensionsnamen zur Vergleichbarkeit auf die deutschen Standardbezeichnungen der Schwesterdateien gemappt. Kommentare in Originalsprache (FR). Hinweis in Datei: '21/40 TN haben das Feedback ausgefüllt', 'Notelskala 1-5'. Mittelwertzeile (Zeile 24) nicht als Antwort gezählt; ein Kommentarfeld enthielt nur einen Punkt und wurde als leer behandelt.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.71,"n":21,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":16}},{"name":"Methodik","typ":"kern","mittelwert":4.43,"n":21,"verteilung":{"1":0,"2":0,"3":2,"4":8,"5":11}},{"name":"Fachlich","typ":"kern","mittelwert":4.71,"n":21,"verteilung":{"1":0,"2":0,"3":0,"4":6,"5":15}},{"name":"1. Meine Rolle als Leiter(-in) verstehen","typ":"modul","mittelwert":4.05,"n":21,"verteilung":{"1":0,"2":0,"3":5,"4":10,"5":6}},{"name":"2. Technische Modelle / Biomechanik","typ":"modul","mittelwert":4.62,"n":21,"verteilung":{"1":0,"2":0,"3":0,"4":8,"5":13}},{"name":"3. Persönliche technische Fortschritte","typ":"modul","mittelwert":4.71,"n":21,"verteilung":{"1":0,"2":0,"3":2,"4":2,"5":17}},{"name":"4. Workshops","typ":"modul","mittelwert":4.71,"n":21,"verteilung":{"1":0,"2":0,"3":0,"4":6,"5":15}},{"name":"5. Verständnis der Sicherheitsdimensionen","typ":"modul","mittelwert":3.81,"n":21,"verteilung":{"1":0,"2":1,"3":7,"4":8,"5":5}},{"name":"6. Übertragung zum Unterrichten","typ":"modul","mittelwert":4.43,"n":21,"verteilung":{"1":0,"2":0,"3":0,"4":12,"5":9}},{"name":"7. Erweiterung des Übungskatalogs","typ":"modul","mittelwert":4.33,"n":21,"verteilung":{"1":0,"2":0,"3":3,"4":8,"5":10}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.62,"n":21,"verteilung":{"1":0,"2":0,"3":0,"4":8,"5":13}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.62,"n":21,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":14}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.86,"n":21,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":18}}],"kommentare":[]},{"id":"Feedback_Technik_Wettkampf_JS-CH_210121_Ski","kurs":"Technik Wettkampf","kurs_code":"JS-CH 210121","datum_text":null,"saison":"2025/26","kategorie":"J+S","sportart":"Ski Alpin","n_antworten":31,"gesamt":4.13,"score_kern":4.42,"score_modul":3.74,"score_orga":4.51,"anteil_kritisch":7.9,"anteil_top":45.5,"hinweise":"Microsoft-Forms-Export (Sheet1), zweisprachig DE/FR – deutsche Spaltenteile verwendet, Kommentare in Originalsprache. Spalte 'Klassenlehrer/chef de classe' ist nicht numerisch und wurde weggelassen (die Datei enthält weiter unten eine Zusatzauswertung Methodisch/Fachlich je Klassenlehrer). Hinweis in Datei: 'Von 39 TN haben 31 an der Feedback Umfrage teilgenommen'. Mittelwertzeile (Zeile 33) nicht als Antwort gezählt. Spalte 'Sonstige Anmerkungen zum Inhalt' war durchgehend leer.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.13,"n":31,"verteilung":{"1":0,"2":0,"3":8,"4":11,"5":12}},{"name":"Methodik","typ":"kern","mittelwert":4.42,"n":31,"verteilung":{"1":0,"2":1,"3":1,"4":13,"5":16}},{"name":"Fachlich","typ":"kern","mittelwert":4.71,"n":31,"verteilung":{"1":1,"2":0,"3":0,"4":5,"5":25}},{"name":"Tag 1: Technik Modell und Wissen Racing Konzept","typ":"modul","mittelwert":3.97,"n":31,"verteilung":{"1":0,"2":3,"3":6,"4":11,"5":11}},{"name":"Tag 2: Racing Basics","typ":"modul","mittelwert":4.0,"n":31,"verteilung":{"1":0,"2":3,"3":4,"4":14,"5":10}},{"name":"Tag 3: Riesenslalom Training und Start Workshop","typ":"modul","mittelwert":4.0,"n":31,"verteilung":{"1":1,"2":1,"3":6,"4":12,"5":11}},{"name":"Tag 4: Riesenslalom Rennen und Slalom Workshop","typ":"modul","mittelwert":3.71,"n":31,"verteilung":{"1":1,"2":0,"3":13,"4":10,"5":7}},{"name":"Tag 5: Technische Prüfung und Abschluss","typ":"modul","mittelwert":3.0,"n":31,"verteilung":{"1":3,"2":10,"3":7,"4":6,"5":5}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.65,"n":31,"verteilung":{"1":0,"2":1,"3":0,"4":8,"5":22}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.68,"n":31,"verteilung":{"1":0,"2":1,"3":0,"4":7,"5":23}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.19,"n":31,"verteilung":{"1":0,"2":1,"3":5,"4":12,"5":13}}],"kommentare":[]},{"id":"Feedback_RTA_On-Snow_Ski_Alpin_2026","kurs":"RTA On-Snow Ski Alpin","kurs_code":null,"datum_text":null,"saison":"2025/26","kategorie":"RTA","sportart":"Ski Alpin","n_antworten":9,"gesamt":4.46,"score_kern":4.63,"score_modul":4.2,"score_orga":4.82,"anteil_kritisch":0.9,"anteil_top":53.7,"hinweise":"Vermerke in der Datei: 'Von 11 TN haben 9 an der Umfrage teilgenommen' und 'Notenskala 1-5, 1=schlecht / 5=am besten'. Titel im Blatt: 'Feedback RTA On-Snow Ski Alpin in Davos 2026'; kein Kurscode und kein Kursdatum hinterlegt, die Antworten wurden am 10.04.2026 erfasst. Spalten ID/Startzeit/Fertigstellungszeit/E-Mail/Name wurden ignoriert. Spaltentitel zweisprachig DE/FR, deutscher Teil übernommen.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.44,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":4}},{"name":"Methodik","typ":"kern","mittelwert":4.67,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":6}},{"name":"Fachlich","typ":"kern","mittelwert":4.78,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":7}},{"name":"Dienstag Schneeprogramm","typ":"modul","mittelwert":4.11,"n":9,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":2}},{"name":"Input Pistenpräparation","typ":"modul","mittelwert":4.33,"n":9,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":4}},{"name":"Mittwoch Schneeprogramm","typ":"modul","mittelwert":4.0,"n":9,"verteilung":{"1":0,"2":1,"3":1,"4":4,"5":3}},{"name":"Donnerstag Schneeprogramm","typ":"modul","mittelwert":4.22,"n":9,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":3}},{"name":"Freitag Schneeprogramm","typ":"modul","mittelwert":4.11,"n":9,"verteilung":{"1":0,"2":0,"3":2,"4":4,"5":3}},{"name":"Theorie","typ":"modul","mittelwert":4.44,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":4}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.89,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":8}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.67,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":6}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.89,"n":9,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":8}}],"kommentare":[]},{"id":"Feedback_Einf__L_SWSK_39_25","kurs":"Einführung Leistungssport","kurs_code":"SWSK 39.25","datum_text":null,"saison":"2025/26","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":30,"gesamt":4.18,"score_kern":4.47,"score_modul":4.13,"score_orga":null,"anteil_kritisch":1.0,"anteil_top":40.0,"hinweise":"Zwei Blätter: Sheet1 = Rohdaten (ausgewertet), Blatt \"Feedback\" = Zusammenfassung. Teilnehmende aus mehreren Sportarten (Ski Alpin, Snowboard/Freestyle, Langlauf/Biathlon, Skispringen), Spalte \"Deine Sportart\" als nicht-numerisch weggelassen. Die Organisationsfrage ist eine Mehrfachauswahl mit Textantworten und daher nicht als numerische Dimension erfasst; die dort erfassten Freitexte sind unter Thema \"Organisation\" aufgeführt. Standarddimensionen Organisatorisch/Methodisch/Fachlich fehlen in dieser Datei. Hinweis in der Datei: 30 von 32 Teilnehmer:innen haben geantwortet.","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.47,"n":30,"verteilung":{"1":0,"2":0,"3":1,"4":14,"5":15}},{"name":"Psycholigische Trainingsformen","typ":"modul","mittelwert":4.27,"n":30,"verteilung":{"1":0,"2":0,"3":4,"4":14,"5":12}},{"name":"Zielsetzungen","typ":"modul","mittelwert":4.27,"n":30,"verteilung":{"1":0,"2":0,"3":6,"4":10,"5":14}},{"name":"Fallberatungen Psyche","typ":"modul","mittelwert":4.33,"n":30,"verteilung":{"1":0,"2":0,"3":4,"4":12,"5":14}},{"name":"Feedback & Präsentieren","typ":"modul","mittelwert":3.8,"n":30,"verteilung":{"1":0,"2":2,"3":9,"4":12,"5":7}},{"name":"Krisenkommunikation","typ":"modul","mittelwert":4.17,"n":30,"verteilung":{"1":0,"2":0,"3":8,"4":9,"5":13}},{"name":"NWF-Förderkonzept","typ":"modul","mittelwert":3.97,"n":30,"verteilung":{"1":0,"2":0,"3":10,"4":11,"5":9}}],"kommentare":[]},{"id":"Feedback_Kurssetzen_Talent_SWSK_31_26","kurs":"Kurssetzen Talent","kurs_code":"SWSK 31.26","datum_text":null,"saison":"2025/26","kategorie":"SWSK","sportart":"Ski Alpin","n_antworten":10,"gesamt":4.41,"score_kern":4.77,"score_modul":4.22,"score_orga":4.3,"anteil_kritisch":3.0,"anteil_top":62.0,"hinweise":"Bewertungen Methodisch/Fachlich/Sozialkompetenz beziehen sich auf die Klassenlehrpersonen; die Spalte \"Wer war dein Klassenlehrer?\" ist nicht-numerisch und wurde weggelassen. Unterhalb der Rohdaten stehen zusätzliche, nach Klassenlehrperson gruppierte Auswertungsblöcke (Duplikate derselben 10 Antworten) – diese wurden nicht doppelt gezählt, ebenso wenig die Mittelwertzeile. Spalte \"Organisatorisch (vor Ort)\" fehlt in dieser Datei. Hinweis in der Datei: von 23 TN haben 10 geantwortet.","dimensionen":[{"name":"Methodik","typ":"kern","mittelwert":4.8,"n":10,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":8}},{"name":"Fachlich","typ":"kern","mittelwert":4.9,"n":10,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":9}},{"name":"Sozialkompetenz","typ":"kern","mittelwert":4.6,"n":10,"verteilung":{"1":0,"2":0,"3":1,"4":2,"5":7}},{"name":"Input SL","typ":"modul","mittelwert":4.3,"n":10,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":5}},{"name":"Input SG","typ":"modul","mittelwert":3.9,"n":10,"verteilung":{"1":0,"2":1,"3":3,"4":2,"5":4}},{"name":"Input Sicherheit und B-Netze","typ":"modul","mittelwert":4.2,"n":10,"verteilung":{"1":0,"2":1,"3":2,"4":1,"5":6}},{"name":"Theorie","typ":"modul","mittelwert":4.5,"n":10,"verteilung":{"1":0,"2":0,"3":2,"4":1,"5":7}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.1,"n":10,"verteilung":{"1":0,"2":1,"3":2,"4":2,"5":5}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.3,"n":10,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":5}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.5,"n":10,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":6}}],"kommentare":[]},{"id":"Feedback_Methodik_Wettkampf_SWSK_32_26","kurs":"Methodik Wettkampf","kurs_code":"SWSK 32.26","datum_text":"16.-19. Juni 2026","saison":"2025/26","kategorie":"SWSK","sportart":"Ski Alpin","n_antworten":11,"gesamt":4.45,"score_kern":4.49,"score_modul":4.56,"score_orga":4.15,"anteil_kritisch":0.7,"anteil_top":51.0,"hinweise":"Datei enthält Hinweis \"Notenskala: 1-5\"; Mittelwertzeile (Zeile 13) nicht mitgezählt. Für die drei Organisations-Detailfragen sind in der Datei nur hart eingetragene Werte statt Formeln hinterlegt (3.9 / 4.27 / 4.27); der nachgerechnete Wert für \"Alle Informationen wurden rechtzeitig...\" ist 3.91. datum_text stammt aus der Extraktions-Spezifikation, nicht aus der Datei selbst.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.18,"n":11,"verteilung":{"1":0,"2":0,"3":2,"4":5,"5":4}},{"name":"Methodik","typ":"kern","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":6}},{"name":"Fachlich","typ":"kern","mittelwert":4.73,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":8}},{"name":"Einführung & Vertiefung Technikmodell","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":6}},{"name":"Einführung & Vertiefung Racing Basics","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":6}},{"name":"Methodische Ansätze RS-Stangen","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":7}},{"name":"Micro-Teaching in den Erscheinungsformen","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":6}},{"name":"Methodische Ansätze SL-Stangen","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":7}},{"name":"Micro-Teaching mit Kindern","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":7}},{"name":"KNW Praxis - Methodik","typ":"modul","mittelwert":4.64,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":7}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":3.91,"n":11,"verteilung":{"1":0,"2":1,"3":1,"4":7,"5":2}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.27,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":8,"5":3}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.27,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":4}}],"kommentare":[]},{"id":"Feedback_Physis_Foundation_SWSK_25_25","kurs":"Physis Foundation","kurs_code":"SWSK 25.25","datum_text":null,"saison":"2025/26","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":38,"gesamt":4.22,"score_kern":4.68,"score_modul":4.13,"score_orga":null,"anteil_kritisch":4.8,"anteil_top":46.5,"hinweise":"Die beiden Mittelwertzeilen (AVERAGE- und gerundete Zeile) wurden nicht als Antworten gezählt. Freitexte stehen in einem Block \"Rückmeldungen\" ohne thematische Untergliederung, daher alle unter \"Sonstiges\". Standarddimensionen Organisatorisch/Methodisch/Fachlich fehlen; stattdessen wird die Rolle der Kursleitung bewertet. Spaltenname gekürzt: \"Wie gut wurde die Rolle der Kursleitung aus deiner Sicht erfüllt?\".","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.68,"n":38,"verteilung":{"1":0,"2":0,"3":1,"4":10,"5":27}},{"name":"Off-Snow Training","typ":"modul","mittelwert":4.39,"n":38,"verteilung":{"1":0,"2":0,"3":5,"4":13,"5":20}},{"name":"Geräteturnen","typ":"modul","mittelwert":3.61,"n":38,"verteilung":{"1":1,"2":3,"3":13,"4":14,"5":7}},{"name":"Leichtathletik","typ":"modul","mittelwert":4.37,"n":38,"verteilung":{"1":0,"2":0,"3":4,"4":16,"5":18}},{"name":"Planung- und Durchführung einer Trainingseinheit","typ":"modul","mittelwert":4.16,"n":38,"verteilung":{"1":0,"2":4,"3":3,"4":14,"5":17}},{"name":"Radsport - Rollen & Gleiten","typ":"modul","mittelwert":4.13,"n":38,"verteilung":{"1":0,"2":3,"3":6,"4":12,"5":17}}],"kommentare":[]},{"id":"Feedback_Physis_Talent_SWSK_38.25","kurs":"Physis Talent","kurs_code":"SWSK 38.25","datum_text":null,"saison":"2025/26","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":36,"gesamt":4.17,"score_kern":4.56,"score_modul":4.11,"score_orga":null,"anteil_kritisch":3.6,"anteil_top":42.9,"hinweise":"Datei enthält vier nach Sportart getrennte Tabellenblöcke mit je eigener Mittelwertzeile (Ski Alpin n=23, Langlauf/Biathlon n=3, Skispringen n=4, Freestyle n=6); alle 36 Rohzeilen wurden zusammengefasst, Mittelwert- und Rundungszeilen ausgeschlossen. Spalte 'Deine Sportart' ist nicht numerisch und wurde weggelassen. Auffällig: Ausdauer bei den Skispringen-Antworten nur 2.25 (n=4).","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.56,"n":36,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":22}},{"name":"Athlet:innenweg","typ":"modul","mittelwert":4.03,"n":36,"verteilung":{"1":0,"2":0,"3":11,"4":13,"5":12}},{"name":"Trainingsplanung","typ":"modul","mittelwert":4.19,"n":36,"verteilung":{"1":0,"2":1,"3":5,"4":16,"5":14}},{"name":"Schnelligkeit und Sprünge","typ":"modul","mittelwert":4.0,"n":36,"verteilung":{"1":0,"2":2,"3":12,"4":6,"5":16}},{"name":"Kraft- und Rumpftraining","typ":"modul","mittelwert":4.33,"n":36,"verteilung":{"1":0,"2":0,"3":4,"4":16,"5":16}},{"name":"Langhanteltechnik","typ":"modul","mittelwert":4.06,"n":36,"verteilung":{"1":0,"2":3,"3":7,"4":11,"5":15}},{"name":"Ausdauer","typ":"modul","mittelwert":4.03,"n":36,"verteilung":{"1":1,"2":2,"3":5,"4":15,"5":13}}],"kommentare":[]},{"id":"Feedback_Physis_Talent_SWSK_97.25","kurs":"Physis Talent","kurs_code":"SWSK 97.25","datum_text":null,"saison":"2025/26","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":11,"gesamt":4.6,"score_kern":4.82,"score_modul":4.56,"score_orga":null,"anteil_kritisch":0.0,"anteil_top":66.2,"hinweise":"Blatt 'Kursauswertung' mit 11 Rohzeilen; der in der Datei ausgewiesene Durchschnitt 4,82 entspricht der Frage zur Kursleitung. Legende im Blatt: 'Bewertungen: 1=irrelevant / 5=sehr relevant'. Die Organisationsfrage wurde nur textlich beantwortet (7x 'alle Informationen rechtzeitig, vollständig und verständlich', 4x 'rechtzeitig, aber manchmal unvollständig oder nicht ganz verständlich') und daher nicht als numerische Dimension geführt.","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.82,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":9}},{"name":"Athlet:innenweg","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":2,"4":1,"5":8}},{"name":"Trainingsplanung","typ":"modul","mittelwert":4.45,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":6}},{"name":"Schnelligkeit/Sprünge","typ":"modul","mittelwert":4.55,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":7}},{"name":"Kraft- und Rumpftraining","typ":"modul","mittelwert":4.82,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":9}},{"name":"Langhanteltechnik","typ":"modul","mittelwert":4.36,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":5}},{"name":"Ausdauer","typ":"modul","mittelwert":4.64,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":7}}],"kommentare":[]},{"id":"Feedback_Rollski_SWSK_21.26","kurs":"Rollski","kurs_code":"SWSK 21.26","datum_text":null,"saison":"2025/26","kategorie":"SWSK","sportart":"Langlauf","n_antworten":8,"gesamt":4.6,"score_kern":4.84,"score_modul":4.3,"score_orga":4.88,"anteil_kritisch":4.5,"anteil_top":71.6,"hinweise":"Spaltentitel zweisprachig DE/FR, deutscher Teil übernommen und gekürzt. 8 Rohzeilen; Mittelwert- und Rundungszeile ausgeschlossen. Alle Freitexte stehen unter dem Block 'Sonstige Anmerkungen zur Organisation oder anderem', betreffen teils aber auch den Inhalt. Eine Grussformel mit dem Vornamen einer teilnehmenden Person wurde aus Datenschutzgründen entfernt. Mehrfach genannt: irreführender Kursname (Skateboard/Inline Skates/Rollski) und Kursort (Magglingen) als ungeeignet für Rollski.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.88,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":7}},{"name":"Methodik","typ":"kern","mittelwert":4.75,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":6}},{"name":"Fachlich","typ":"kern","mittelwert":4.88,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":7}},{"name":"Aufwärmung","typ":"modul","mittelwert":4.5,"n":8,"verteilung":{"1":0,"2":1,"3":0,"4":1,"5":6}},{"name":"BASICS","typ":"modul","mittelwert":4.13,"n":8,"verteilung":{"1":0,"2":1,"3":0,"4":4,"5":3}},{"name":"Skating","typ":"modul","mittelwert":4.38,"n":8,"verteilung":{"1":0,"2":1,"3":0,"4":2,"5":5}},{"name":"Workshops","typ":"modul","mittelwert":4.25,"n":8,"verteilung":{"1":0,"2":1,"3":0,"4":3,"5":4}},{"name":"Persönliche Technik","typ":"modul","mittelwert":4.25,"n":8,"verteilung":{"1":0,"2":0,"3":2,"4":2,"5":4}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.75,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":6}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":5.0,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":8}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.88,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":7}}],"kommentare":[]},{"id":"Feedback_Technik_Wettkampf_Freestyle_SWSK_29.26","kurs":"Technik Wettkampf Freestyle","kurs_code":"SWSK 29.26","datum_text":null,"saison":"2025/26","kategorie":"SWSK","sportart":"Freestyle Style","n_antworten":13,"gesamt":4.67,"score_kern":4.87,"score_modul":4.54,"score_orga":4.69,"anteil_kritisch":1.4,"anteil_top":75.5,"hinweise":"Blatt 'Auswertung TeWe Freestyle'; Kopfspalten (ID/Zeit/E-Mail/Name) bereits nicht enthalten. Hinweis in Datei: '13/26 haben Rückmeldung gegeben', 'Notenskala 1-5'. Mittelwert-/Rundungszeile (Zeilen 15/16) nicht als Antwort gezählt. Spaltentitel 'Fundamentels Kicker' (Tippfehler in Quelle) als 'Fundamentals Kicker' normalisiert.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.77,"n":13,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":11}},{"name":"Methodik","typ":"kern","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Fachlich","typ":"kern","mittelwert":5.0,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":13}},{"name":"Fundamentals Slope","typ":"modul","mittelwert":4.0,"n":13,"verteilung":{"1":0,"2":2,"3":1,"4":5,"5":5}},{"name":"Fundamentals Kicker","typ":"modul","mittelwert":4.62,"n":13,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":9}},{"name":"Fundamentals Box/Rail","typ":"modul","mittelwert":4.69,"n":13,"verteilung":{"1":0,"2":0,"3":1,"4":2,"5":10}},{"name":"Training & Coaching Kicker","typ":"modul","mittelwert":4.77,"n":13,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":11}},{"name":"Training & Coaching Halfpipe","typ":"modul","mittelwert":4.62,"n":13,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":9}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.46,"n":13,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":8}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.77,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":10}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}}],"kommentare":[]},{"id":"Feedback_Technikabgleich_Nordisch_MFL_Biathlon","kurs":"Technikabgleich Nordisch MFL Biathlon","kurs_code":null,"datum_text":null,"saison":"2025/26","kategorie":"Sonstige","sportart":"Biathlon","n_antworten":15,"gesamt":4.38,"score_kern":4.53,"score_modul":4.35,"score_orga":null,"anteil_kritisch":0.8,"anteil_top":49.2,"hinweise":"Microsoft-Forms-Export (Sheet1), zweisprachig DE/FR – deutsche Spaltenteile verwendet; Antworten teils auf FR im Original belassen. Blatt 2 ('Auswertung Biathlon') enthält nur Grafiken/Textlisten derselben Daten und ist im Titel fälschlich mit 'Langlauf' beschriftet. Hinweis in Datei: '15 Personen haben geantwortet von insgesamt 15 Teilnehmer:innen'. Mittelwertzeile (Zeile 18) nicht als Antwort gezählt. Die Organisationsfrage ist eine Auswahlfrage ohne Skala und wurde nicht als Dimension geführt: 13x 'alle Informationen rechtzeitig, vollständig und verständlich', 2x 'rechtzeitig, aber manchmal unvollständig oder nicht ganz verständlich'. Antworten datiert 25.06.2025. Keine Standarddimensionen Organisatorisch/Methodisch/Fachlich in diesem Formular.","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.53,"n":15,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":9}},{"name":"Best Practice & Key Points GLS und Komplex","typ":"modul","mittelwert":4.27,"n":15,"verteilung":{"1":0,"2":0,"3":1,"4":9,"5":5}},{"name":"Die Zauberformel für das perfekte Team","typ":"modul","mittelwert":4.47,"n":15,"verteilung":{"1":0,"2":0,"3":0,"4":8,"5":7}},{"name":"Input Benchmark Weltcup","typ":"modul","mittelwert":4.47,"n":15,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":8}},{"name":"Input Forschung (My Swiss-Ski/Schiess App/FTEM usw.)","typ":"modul","mittelwert":4.53,"n":15,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":10}},{"name":"Gruppenarbeit Analyse Schussbild","typ":"modul","mittelwert":4.0,"n":15,"verteilung":{"1":0,"2":1,"3":4,"4":4,"5":6}},{"name":"Schiesstechnik Praxis","typ":"modul","mittelwert":4.27,"n":15,"verteilung":{"1":0,"2":0,"3":2,"4":7,"5":6}},{"name":"Input Scatt","typ":"modul","mittelwert":4.47,"n":15,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":8}}],"kommentare":[]},{"id":"Feedback_Technikabgleich_Nordisch_MFL_Langlauf","kurs":"Technikabgleich Nordisch MFL Langlauf","kurs_code":null,"datum_text":null,"saison":"2025/26","kategorie":"Sonstige","sportart":"Langlauf","n_antworten":8,"gesamt":3.75,"score_kern":4.0,"score_modul":3.71,"score_orga":null,"anteil_kritisch":12.5,"anteil_top":29.7,"hinweise":"Microsoft-Forms-Export (Sheet1), zweisprachig DE/FR – deutsche Spaltenteile verwendet; Antworten teils auf FR im Original belassen. Blatt 2 ('Auswertung Langlauf') enthält nur Grafiken/Textlisten derselben Daten und ist im Titel fälschlich mit 'Biathlon' beschriftet. Hinweis in Datei: '8 Personen haben geantwortet von insgesamt 25 Teilnehmer:innen' – tiefe Rücklaufquote (32%). Mittelwertzeile (Zeile 11) nicht als Antwort gezählt. Die Organisationsfrage ist eine Auswahlfrage ohne Skala und wurde nicht als Dimension geführt: 5x 'alle Informationen rechtzeitig, vollständig und verständlich', 3x 'rechtzeitig, aber manchmal unvollständig oder nicht ganz verständlich'; die zusätzlichen Freitexte daraus sind unter Thema 'Organisation' erfasst. Antworten datiert 24.06.2025.","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.0,"n":8,"verteilung":{"1":0,"2":1,"3":1,"4":3,"5":3}},{"name":"Technik Workshop Klassisch Montag","typ":"modul","mittelwert":4.0,"n":8,"verteilung":{"1":0,"2":1,"3":1,"4":3,"5":3}},{"name":"Einstieg: Expertreninfo und Expertenmanual","typ":"modul","mittelwert":3.25,"n":8,"verteilung":{"1":0,"2":2,"3":3,"4":2,"5":1}},{"name":"Input Atmung","typ":"modul","mittelwert":3.5,"n":8,"verteilung":{"1":0,"2":0,"3":6,"4":0,"5":2}},{"name":"Philosophie C-Kader Langlauf","typ":"modul","mittelwert":3.75,"n":8,"verteilung":{"1":0,"2":2,"3":1,"4":2,"5":3}},{"name":"Input Forschung","typ":"modul","mittelwert":3.5,"n":8,"verteilung":{"1":0,"2":1,"3":3,"4":3,"5":1}},{"name":"Technical Workshop Intervaltraining","typ":"modul","mittelwert":4.0,"n":8,"verteilung":{"1":0,"2":1,"3":1,"4":3,"5":3}},{"name":"Die Zauberformel für das perfekte Team","typ":"modul","mittelwert":4.0,"n":8,"verteilung":{"1":0,"2":0,"3":3,"4":2,"5":3}}],"kommentare":[]},{"id":"Feedback_Leiterkurs_Skispringen_SZ_691_1_26","kurs":"Leiterkurs Skispringen","kurs_code":"SZ 691.1-26","datum_text":null,"saison":"2026/27","kategorie":"Leiterkurs","sportart":"Skispringen","n_antworten":3,"gesamt":4.67,"score_kern":4.78,"score_modul":4.67,"score_orga":4.56,"anteil_kritisch":0.0,"anteil_top":66.7,"hinweise":"Zweisprachige Spaltenüberschriften (DE/FR); es wurde jeweils der deutsche Teil übernommen. Kein Kursdatum in der Datei hinterlegt; die Antworten datieren vom 10.05. und 12.05.2026. Nur 3 Antwortzeilen, danach ausschliesslich Leerzeilen sowie eine manuell eingefügte Sammelzeile mit den zusammenkopierten Freitexten – diese wurde nicht als Antwort gezählt. Die Freitextspalte 'Sonstige Anmerkungen zum Inhalt' war leer; alle Kommentare stammen aus der Spalte 'Sonstige Anmerkungen zur Organisation oder anderem'. Kleine Stichprobe (n=3), Mittelwerte nur bedingt aussagekräftig.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":5.0,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":3}},{"name":"Methodik","typ":"kern","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}},{"name":"Fachlich","typ":"kern","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}},{"name":"Erscheinungs- und Trainingsformen","typ":"modul","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}},{"name":"Off-Snow Training für Kinder bis zum PISTE Test","typ":"modul","mittelwert":4.33,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":1}},{"name":"Materialkunde","typ":"modul","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}},{"name":"Schnuppertraining Skispringen sicher und effizient führen","typ":"modul","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}},{"name":"Wertvoller Sport","typ":"modul","mittelwert":5.0,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":3}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.33,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":1}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}}],"kommentare":[]},{"id":"Feedback_NLZ_Day_Mitte_2026","kurs":"NLZ-Day Mitte","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"NLZ-Day","sportart":"sportartübergreifend","n_antworten":30,"gesamt":4.19,"score_kern":4.4,"score_modul":3.92,"score_orga":4.47,"anteil_kritisch":4.2,"anteil_top":40.4,"hinweise":"Datei intern als 'Kursfeedback NLZ Forum Mitte' bezeichnet; kein Kursdatum und kein Kurscode hinterlegt. Zwei Blätter ('Grafik' und 'Zahlen'); ausgewertet wurde das Blatt 'Zahlen' mit den 30 Rohantwortzeilen. Die beiden Zeilen mit =AVERAGE()- bzw. =ROUND()-Formeln wurden nicht als Antworten gezählt; die neu berechneten Mittelwerte stimmen mit den Formelwerten überein. Personenbezogene Spalten (ID, Zeitstempel, E-Mail, Name) sind in dieser Datei bereits entfernt. Die Standarddimensionen Organisatorisch/Methodisch/Fachlich fehlen; stattdessen nur 'Rolle der Kursleitung'. Freitexte stehen als separate Blöcke unter der Tabelle.","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.4,"n":30,"verteilung":{"1":0,"2":0,"3":1,"4":16,"5":13}},{"name":"FAPS (Female Athletes Performance in Snowsports","typ":"modul","mittelwert":3.73,"n":30,"verteilung":{"1":0,"2":5,"3":5,"4":13,"5":7}},{"name":"FTEM-Psyche","typ":"modul","mittelwert":3.77,"n":30,"verteilung":{"1":0,"2":2,"3":7,"4":17,"5":4}},{"name":"Concussion / Nackentraining","typ":"modul","mittelwert":4.53,"n":30,"verteilung":{"1":0,"2":1,"3":0,"4":11,"5":18}},{"name":"FTEM-Athletik","typ":"modul","mittelwert":3.67,"n":30,"verteilung":{"1":0,"2":1,"3":13,"4":11,"5":5}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.63,"n":30,"verteilung":{"1":0,"2":0,"3":1,"4":9,"5":20}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.4,"n":30,"verteilung":{"1":0,"2":0,"3":4,"4":10,"5":16}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.37,"n":30,"verteilung":{"1":0,"2":1,"3":1,"4":14,"5":14}}],"kommentare":[]},{"id":"Feedback_NLZ_Day_Ost_2026","kurs":"NLZ-Day Ost","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"NLZ-Day","sportart":"sportartübergreifend","n_antworten":26,"gesamt":4.54,"score_kern":4.8,"score_modul":4.33,"score_orga":4.79,"anteil_kritisch":0.9,"anteil_top":64.4,"hinweise":"Datei intern als 'Kursfeedback NLZ Forum Ost' bezeichnet; kein Kursdatum und kein Kurscode hinterlegt. Zwei Blätter ('Grafik' und 'Zahlen'); ausgewertet wurde das Blatt 'Zahlen' mit den 26 Rohantwortzeilen. Die beiden Formelzeilen (=AVERAGE / =ROUND) wurden nicht als Antworten gezählt; die neu berechneten Mittelwerte stimmen mit den Formelwerten überein. In der Spalte 'Rolle der Kursleitung' steht in einer Zeile der Buchstabe 'd' statt einer Note – dieser Wert wurde als ungültig gewertet, daher n=25 statt 26. Bei 'Die Gesamtorganisation des Kurses ist positiv' gibt es eine einzelne 1er-Bewertung (möglicher Ausreisser/Eingabefehler), die den Mittelwert spürbar senkt. Die Standarddimensionen Organisatorisch/Methodisch/Fachlich fehlen. Der Freitextblock 'Sonstige Anmerkungen zur Organisation oder anderem' war leer.","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.8,"n":25,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":20}},{"name":"FAPS (Female Athletes Performance in Snowsports","typ":"modul","mittelwert":4.19,"n":26,"verteilung":{"1":0,"2":1,"3":5,"4":8,"5":12}},{"name":"FTEM-Psyche","typ":"modul","mittelwert":4.42,"n":26,"verteilung":{"1":0,"2":0,"3":2,"4":11,"5":13}},{"name":"Concussion / Nackentraining","typ":"modul","mittelwert":4.46,"n":26,"verteilung":{"1":0,"2":0,"3":3,"4":8,"5":15}},{"name":"FTEM-Athletik","typ":"modul","mittelwert":4.31,"n":26,"verteilung":{"1":0,"2":0,"3":3,"4":12,"5":11}},{"name":"Digitaler Windkanal","typ":"modul","mittelwert":4.27,"n":26,"verteilung":{"1":0,"2":0,"3":6,"4":7,"5":13}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.88,"n":26,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":24}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.92,"n":26,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":24}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.58,"n":26,"verteilung":{"1":1,"2":0,"3":0,"4":7,"5":18}}],"kommentare":[]},{"id":"Feedback_NLZ_Day_West_2026","kurs":"NLZ-Day West","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"NLZ-Day","sportart":"sportartübergreifend","n_antworten":31,"gesamt":4.16,"score_kern":4.35,"score_modul":3.94,"score_orga":4.38,"anteil_kritisch":5.2,"anteil_top":43.5,"hinweise":"Kein Kursdatum und kein Kurscode hinterlegt. Zwei Blätter: 'Feedback NLZ West' (Rohdaten, ausgewertet) und 'Auswertung' (Grafik/Textzusammenzug). Vermerk in der Datei: 'Von 43 TN haben 31 Personen an der Umfrage teilgenommen'. Die Spaltenüberschriften sind ausschliesslich französisch; die Dimensionsnamen wurden zwecks Vergleichbarkeit auf die deutschen Bezeichnungen der übrigen NLZ-Day-Dateien gemappt (Rôle de chef du cours = Rolle der Kursleitung, FTEM-Psyché = FTEM-Psyche, Concussion / Entraînement du nuque = Concussion / Nackentraining, FTEM-Athlétique = FTEM-Athletik, Toutes les informations ont été fournies en temps utile = Alle Informationen wurden rechtzeitig zur Verfügung gestellt, Toutes les informations étaient claires = Alle Informationen waren verständlich, L'organisation générale du cours est satisfaisante = Die Gesamtorganisation des Kurses ist positiv). Die Freitexte sind mehrheitlich französisch und wurden wörtlich übernommen. Die beiden Formelzeilen wurden nicht als Antworten gezählt; die neu berechneten Mittelwerte stimmen mit der =AVERAGE()-Zeile überein. Achtung Quellfehler: In der =ROUND()-Zeile verweisen die drei Organisationsspalten (H34/I34/J34) fälschlicherweise auf FTEM-Psyché/Concussion/FTEM-Athlétique und zeigen daher 3.71/4.23/3.81 statt korrekt 4.35/4.32/4.48. Antwortzeile 5 enthält durchgehend die Note 1 (möglicher Protest- oder Ausreisserfall) und senkt alle Mittelwerte. Die Standarddimensionen Organisatorisch/Methodisch/Fachlich fehlen.","dimensionen":[{"name":"Kursleitung","typ":"kern","mittelwert":4.35,"n":31,"verteilung":{"1":1,"2":0,"3":1,"4":14,"5":15}},{"name":"FAPS (Female Athletes Performance in Snowsports","typ":"modul","mittelwert":4.0,"n":31,"verteilung":{"1":1,"2":0,"3":7,"4":13,"5":10}},{"name":"FTEM-Psyche","typ":"modul","mittelwert":3.71,"n":31,"verteilung":{"1":0,"2":4,"3":10,"4":8,"5":9}},{"name":"Concussion / Nackentraining","typ":"modul","mittelwert":4.23,"n":31,"verteilung":{"1":1,"2":0,"3":5,"4":10,"5":15}},{"name":"FTEM-Athletik","typ":"modul","mittelwert":3.81,"n":31,"verteilung":{"1":0,"2":2,"3":10,"4":11,"5":8}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.35,"n":31,"verteilung":{"1":2,"2":0,"3":1,"4":10,"5":18}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.32,"n":31,"verteilung":{"1":1,"2":0,"3":2,"4":13,"5":15}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.48,"n":31,"verteilung":{"1":1,"2":0,"3":0,"4":12,"5":18}}],"kommentare":[]},{"id":"Feedback_Nordic_Days_2026","kurs":"Nordic Days","kurs_code":null,"datum_text":"15.-16. Juni 2026 in Magglingen","saison":"2026/27","kategorie":"Nordic Days","sportart":"Nordisch","n_antworten":29,"gesamt":4.19,"score_kern":4.48,"score_modul":3.93,"score_orga":4.6,"anteil_kritisch":3.4,"anteil_top":38.2,"hinweise":"Von 40 TN haben 29 Personen an der Umfrage teilgenommen. Zwei Mittelwertzeilen (AVERAGE/ROUND) am Ende wurden nicht als Antworten gezählt. Spaltenüberschriften zweisprachig DE/FR, deutscher Teil übernommen. Nur eine Freitextspalte (Sonstige Anmerkungen, optional).","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.62,"n":29,"verteilung":{"1":0,"2":0,"3":1,"4":9,"5":19}},{"name":"Methodik","typ":"kern","mittelwert":4.31,"n":29,"verteilung":{"1":0,"2":0,"3":1,"4":18,"5":10}},{"name":"Fachlich","typ":"kern","mittelwert":4.52,"n":29,"verteilung":{"1":0,"2":0,"3":1,"4":12,"5":16}},{"name":"Trainer als Lotsen und Mythenjäger","typ":"modul","mittelwert":3.55,"n":29,"verteilung":{"1":0,"2":2,"3":10,"4":16,"5":1}},{"name":"Theorie: Wissenschaftliche Grundlagen und Leistungsframework","typ":"modul","mittelwert":4.45,"n":29,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":15}},{"name":"Intervaltraining auf dem Laufband","typ":"modul","mittelwert":3.76,"n":29,"verteilung":{"1":0,"2":3,"3":7,"4":13,"5":6}},{"name":"Theorie: Betty Bossi Rezepte Ausdauer","typ":"modul","mittelwert":3.72,"n":29,"verteilung":{"1":0,"2":3,"3":7,"4":14,"5":5}},{"name":"Praxis: Betty Bossy Rezepte Ausdauer","typ":"modul","mittelwert":3.9,"n":29,"verteilung":{"1":0,"2":2,"3":7,"4":12,"5":8}},{"name":"Ideale erkennen und hinzufügen","typ":"modul","mittelwert":3.9,"n":29,"verteilung":{"1":1,"2":0,"3":5,"4":18,"5":5}},{"name":"Theorie: Physiologie und Mythen","typ":"modul","mittelwert":4.03,"n":29,"verteilung":{"1":0,"2":2,"3":2,"4":18,"5":7}},{"name":"Gastvortrag: Swiss Cycling","typ":"modul","mittelwert":4.1,"n":29,"verteilung":{"1":0,"2":1,"3":5,"4":13,"5":10}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.52,"n":29,"verteilung":{"1":0,"2":0,"3":1,"4":12,"5":16}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.55,"n":29,"verteilung":{"1":0,"2":0,"3":0,"4":13,"5":16}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.72,"n":29,"verteilung":{"1":0,"2":0,"3":0,"4":8,"5":21}}],"kommentare":[]},{"id":"Feedback_RTA_Coaching_Ski_Alpin_LL_Bia_2026","kurs":"RTA Coaching Ski Alpin, LL & Biathlon","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"RTA","sportart":"sportartübergreifend","n_antworten":16,"gesamt":4.26,"score_kern":4.21,"score_modul":4.17,"score_orga":4.48,"anteil_kritisch":0.5,"anteil_top":44.8,"hinweise":"Zwei Blätter mit identischem Fragebogen: Ski Alpin/Skicross (9 von 10 TN) und Nordisch (7 von 8 TN); hier zusammengeführt. Je Blatt AVERAGE- und ROUND-Zeile nicht als Antworten gezählt. Gemeinsamer Kurs mehrerer Sportarten, daher sportartübergreifend. Kein Kursdatum in der Datei. Nur ein Freitextfeld. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.44,"n":16,"verteilung":{"1":0,"2":0,"3":1,"4":7,"5":8}},{"name":"Methodik","typ":"kern","mittelwert":4.13,"n":16,"verteilung":{"1":0,"2":0,"3":4,"4":6,"5":6}},{"name":"Fachlich","typ":"kern","mittelwert":4.06,"n":16,"verteilung":{"1":0,"2":0,"3":4,"4":7,"5":5}},{"name":"Material und Präparation","typ":"modul","mittelwert":4.63,"n":16,"verteilung":{"1":0,"2":0,"3":0,"4":6,"5":10}},{"name":"Command Center, Digital Coaching","typ":"modul","mittelwert":3.94,"n":16,"verteilung":{"1":0,"2":0,"3":6,"4":5,"5":5}},{"name":"Datenschutz, Lernen mit Bildern","typ":"modul","mittelwert":4.0,"n":16,"verteilung":{"1":0,"2":0,"3":4,"4":8,"5":4}},{"name":"Videoanalyse und Reporting On and Off Snow","typ":"modul","mittelwert":4.31,"n":16,"verteilung":{"1":0,"2":0,"3":5,"4":1,"5":10}},{"name":"Feedback, Methoden und Coaching im Techniktraining","typ":"modul","mittelwert":4.19,"n":16,"verteilung":{"1":0,"2":0,"3":3,"4":7,"5":6}},{"name":"Wettkampf-Coaching","typ":"modul","mittelwert":3.94,"n":16,"verteilung":{"1":0,"2":1,"3":4,"4":6,"5":5}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.44,"n":16,"verteilung":{"1":0,"2":0,"3":1,"4":7,"5":8}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.56,"n":16,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":10}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.44,"n":16,"verteilung":{"1":0,"2":0,"3":2,"4":5,"5":9}}],"kommentare":[]},{"id":"Feedback_RTA_Off-Snow_Freestyle","kurs":"RTA Off-Snow Freestyle","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"RTA","sportart":"Freestyle Style","n_antworten":13,"gesamt":4.49,"score_kern":4.7,"score_modul":4.27,"score_orga":4.72,"anteil_kritisch":1.9,"anteil_top":62.2,"hinweise":"Manuell nachbearbeiteter Forms-Export; Zeilen 'Durchschnitt' und 'Gerundet auf Zwei Kommastellen' wurden nicht als Antworten gezählt. Hinweis in Datei: von 15 TN haben 13 Personen teilgenommen. Nur ein Freitextfeld ('Sonstige Anmerkungen zur Organisation oder anderem'). Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.62,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":8}},{"name":"Methodik","typ":"kern","mittelwert":4.62,"n":13,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":9}},{"name":"Fachlich","typ":"kern","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Akrobatik","typ":"modul","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Bewegungsanalyse & Biomechanik","typ":"modul","mittelwert":4.23,"n":13,"verteilung":{"1":1,"2":0,"3":1,"4":4,"5":7}},{"name":"Kraft & Langhantel","typ":"modul","mittelwert":4.15,"n":13,"verteilung":{"1":0,"2":0,"3":2,"4":7,"5":4}},{"name":"Ausdauer","typ":"modul","mittelwert":4.0,"n":13,"verteilung":{"1":0,"2":1,"3":2,"4":6,"5":4}},{"name":"Schnelligkeit","typ":"modul","mittelwert":4.0,"n":13,"verteilung":{"1":0,"2":0,"3":5,"4":3,"5":5}},{"name":"Concussion & Nackentraining","typ":"modul","mittelwert":4.38,"n":13,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":6}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.46,"n":13,"verteilung":{"1":0,"2":1,"3":2,"4":0,"5":10}}],"kommentare":[]},{"id":"Feedback_RTA_Off-Snow_Nordisch_2026","kurs":"RTA Off-Snow Nordisch","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"RTA","sportart":"Nordisch","n_antworten":12,"gesamt":3.99,"score_kern":4.28,"score_modul":3.75,"score_orga":4.42,"anteil_kritisch":7.8,"anteil_top":37.2,"hinweise":"Manuell nachbearbeiteter Forms-Export; Durchschnitts- und Rundungszeile nicht als Antworten gezählt. Hinweis in Datei: von 16 TN haben 12 Personen teilgenommen. Spaltentitel 'Audauer' im Original (Tippfehler), hier als 'Ausdauer' geführt. Nur ein Freitextfeld. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":3.83,"n":12,"verteilung":{"1":1,"2":0,"3":1,"4":8,"5":2}},{"name":"Methodik","typ":"kern","mittelwert":4.42,"n":12,"verteilung":{"1":0,"2":1,"3":0,"4":4,"5":7}},{"name":"Fachlich","typ":"kern","mittelwert":4.58,"n":12,"verteilung":{"1":1,"2":0,"3":0,"4":1,"5":10}},{"name":"Sportartanalyse","typ":"modul","mittelwert":3.17,"n":12,"verteilung":{"1":0,"2":4,"3":4,"4":2,"5":2}},{"name":"Rumpfkraft","typ":"modul","mittelwert":3.83,"n":12,"verteilung":{"1":0,"2":1,"3":2,"4":7,"5":2}},{"name":"Planung & My Swiss-Ski","typ":"modul","mittelwert":3.25,"n":12,"verteilung":{"1":0,"2":2,"3":6,"4":3,"5":1}},{"name":"NLZ Test","typ":"modul","mittelwert":3.67,"n":12,"verteilung":{"1":1,"2":0,"3":4,"4":4,"5":3}},{"name":"Ausdauer","typ":"modul","mittelwert":3.83,"n":12,"verteilung":{"1":1,"2":0,"3":3,"4":4,"5":4}},{"name":"Regeneration & FAPS","typ":"modul","mittelwert":3.83,"n":12,"verteilung":{"1":0,"2":0,"3":4,"4":6,"5":2}},{"name":"Kraft","typ":"modul","mittelwert":4.83,"n":12,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":10}},{"name":"Skills Check","typ":"modul","mittelwert":3.75,"n":12,"verteilung":{"1":0,"2":1,"3":5,"4":2,"5":4}},{"name":"Gruppenarbeit Planung","typ":"modul","mittelwert":3.58,"n":12,"verteilung":{"1":0,"2":1,"3":5,"4":4,"5":2}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.42,"n":12,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":6}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.5,"n":12,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":7}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.33,"n":12,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":5}}],"kommentare":[]},{"id":"Feedback_RTA_Off-Snow_Ski_Alpin_2026","kurs":"RTA Off-Snow Ski Alpin","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"RTA","sportart":"Ski Alpin","n_antworten":8,"gesamt":4.3,"score_kern":4.37,"score_modul":4.31,"score_orga":4.21,"anteil_kritisch":0.8,"anteil_top":50.0,"hinweise":"Manuell nachbearbeiteter Forms-Export; Durchschnitts- und Rundungszeile nicht als Antworten gezählt. Hinweis in Datei: von 10 TN haben 8 Personen teilgenommen. Alle berechneten Mittelwerte stimmen mit den in der Datei ausgewiesenen Werten überein. Nur ein Freitextfeld. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.12,"n":8,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":3}},{"name":"Methodik","typ":"kern","mittelwert":4.25,"n":8,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":3}},{"name":"Fachlich","typ":"kern","mittelwert":4.75,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":6}},{"name":"Sportartanalyse","typ":"modul","mittelwert":4.12,"n":8,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":3}},{"name":"Rumpfkraft","typ":"modul","mittelwert":4.38,"n":8,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":4}},{"name":"Planung & My Swiss-Ski","typ":"modul","mittelwert":4.12,"n":8,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":3}},{"name":"Regeneration & FAPS","typ":"modul","mittelwert":4.38,"n":8,"verteilung":{"1":0,"2":0,"3":1,"4":3,"5":4}},{"name":"Leistungstest & Testauswertung","typ":"modul","mittelwert":4.12,"n":8,"verteilung":{"1":0,"2":0,"3":2,"4":3,"5":3}},{"name":"Ausdauer","typ":"modul","mittelwert":4.12,"n":8,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":2}},{"name":"Skills Check","typ":"modul","mittelwert":4.75,"n":8,"verteilung":{"1":0,"2":0,"3":1,"4":0,"5":7}},{"name":"Kraft","typ":"modul","mittelwert":4.88,"n":8,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":7}},{"name":"Gruppenarbeit Planung","typ":"modul","mittelwert":3.88,"n":8,"verteilung":{"1":0,"2":1,"3":2,"4":2,"5":3}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.12,"n":8,"verteilung":{"1":0,"2":0,"3":3,"4":1,"5":4}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.25,"n":8,"verteilung":{"1":0,"2":0,"3":2,"4":2,"5":4}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.25,"n":8,"verteilung":{"1":0,"2":0,"3":2,"4":2,"5":4}}],"kommentare":[]},{"id":"Feedback_RTA_Coach._Tech._Skispringen_2026","kurs":"RTA Technik & Coaching Skispringen","kurs_code":null,"datum_text":"16.-19. Juni 2026","saison":"2026/27","kategorie":"RTA","sportart":"Skispringen","n_antworten":7,"gesamt":3.89,"score_kern":3.62,"score_modul":3.86,"score_orga":4.24,"anteil_kritisch":10.2,"anteil_top":28.6,"hinweise":"Von 7 TN haben 7 Personen teilgenommen (Vollrücklauf, kleine Stichprobe). Zwei Mittelwertzeilen (AVERAGE/ROUND) nicht als Antworten gezählt. Nur eine Freitextspalte; Themen inhaltlich zugeordnet. Auffällig tiefe Werte bei 'FTEM & Skills Check Technik' (2.71) und 'Coaching im Wettkampf' (3.14); Kritik betrifft mehrfach Programmdichte/Erholung. Dimensionsname 'Austausch mit Bine & Marvin' nennt Kursleitende (zulässig).","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":3.57,"n":7,"verteilung":{"1":0,"2":0,"3":4,"4":2,"5":1}},{"name":"Methodik","typ":"kern","mittelwert":3.71,"n":7,"verteilung":{"1":0,"2":1,"3":1,"4":4,"5":1}},{"name":"Fachlich","typ":"kern","mittelwert":3.57,"n":7,"verteilung":{"1":0,"2":1,"3":2,"4":3,"5":1}},{"name":"Methoden und Coaching im Techniktraining","typ":"modul","mittelwert":3.57,"n":7,"verteilung":{"1":0,"2":1,"3":2,"4":3,"5":1}},{"name":"Material","typ":"modul","mittelwert":4.0,"n":7,"verteilung":{"1":0,"2":1,"3":1,"4":2,"5":3}},{"name":"FTEM & Skills Check Technik","typ":"modul","mittelwert":2.71,"n":7,"verteilung":{"1":1,"2":2,"3":2,"4":2,"5":0}},{"name":"Technikanalyse","typ":"modul","mittelwert":4.43,"n":7,"verteilung":{"1":0,"2":0,"3":1,"4":2,"5":4}},{"name":"Coaching-Analyse","typ":"modul","mittelwert":4.29,"n":7,"verteilung":{"1":0,"2":0,"3":0,"4":5,"5":2}},{"name":"Austausch mit Bine & Marvin","typ":"modul","mittelwert":4.57,"n":7,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":4}},{"name":"Gender-spezifisches Coaching","typ":"modul","mittelwert":4.14,"n":7,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":2}},{"name":"Coaching im Wettkampf","typ":"modul","mittelwert":3.14,"n":7,"verteilung":{"1":0,"2":2,"3":2,"4":3,"5":0}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.57,"n":7,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":4}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.57,"n":7,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":4}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":3.57,"n":7,"verteilung":{"1":0,"2":1,"3":2,"4":3,"5":1}}],"kommentare":[]},{"id":"Feedback_RTA_Technik_Biathlon","kurs":"RTA Technik Biathlon","kurs_code":null,"datum_text":"17.-20. August 2026","saison":"2026/27","kategorie":"RTA","sportart":"Biathlon","n_antworten":2,"gesamt":4.09,"score_kern":4.17,"score_modul":4.1,"score_orga":4.0,"anteil_kritisch":0.0,"anteil_top":22.7,"hinweise":"Nur 2 Rückmeldungen (von 2 TN) – sehr kleine Stichprobe. Die fünf Modulspalten haben in der Quelle keine Titel (Spaltenköpfe 'Column', '2', '3', '4', '5'); hier als Modul 1–5 geführt. Durchschnittszeile nicht als Antwort gezählt. Freitextspalte leer. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":3.5,"n":2,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":0}},{"name":"Methodik","typ":"kern","mittelwert":4.5,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":1}},{"name":"Fachlich","typ":"kern","mittelwert":4.5,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":1}},{"name":"Modul 1 (Titel fehlt in Quelle)","typ":"modul","mittelwert":4.5,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":1}},{"name":"Modul 2 (Titel fehlt in Quelle)","typ":"modul","mittelwert":3.5,"n":2,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":0}},{"name":"Modul 3 (Titel fehlt in Quelle)","typ":"modul","mittelwert":3.5,"n":2,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":0}},{"name":"Modul 4 (Titel fehlt in Quelle)","typ":"modul","mittelwert":5.0,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":2}},{"name":"Modul 5 (Titel fehlt in Quelle)","typ":"modul","mittelwert":4.0,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":0}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.0,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":0}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.0,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":0}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.0,"n":2,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":0}}],"kommentare":[]},{"id":"Feedback_RTA_Technik_Langlauf","kurs":"RTA Technik Langlauf","kurs_code":null,"datum_text":null,"saison":"2026/27","kategorie":"RTA","sportart":"Langlauf","n_antworten":6,"gesamt":4.57,"score_kern":4.67,"score_modul":4.47,"score_orga":4.83,"anteil_kritisch":0.0,"anteil_top":60.8,"hinweise":"Durchgeführt in Davos (laut Titel), kein Kursdatum in der Datei. Hinweis in der Datei: von 6 TN haben 6 teilgenommen. AVERAGE- und ROUND-Zeile nicht als Antworten gezählt. Zwei Freitextspalten (Inhalt / Organisation), nur ein Eintrag. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.83,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":5}},{"name":"Methodik","typ":"kern","mittelwert":4.67,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":4}},{"name":"Fachlich","typ":"kern","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":3}},{"name":"My SwissSki On-Snow Planung","typ":"modul","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":1,"4":2,"5":3}},{"name":"Langlauf Technik (effizient & dynamisch)","typ":"modul","mittelwert":4.67,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":4}},{"name":"Langlauf Taktik (Playbook 2026)","typ":"modul","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":4}},{"name":"Skating (Athletenbeurteilung + GPS mit TG2)","typ":"modul","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":3}},{"name":"Skating (Coach the Coach mit TG3)","typ":"modul","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":2}},{"name":"Skills Checks (On-Snow)","typ":"modul","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":1,"4":2,"5":3}},{"name":"Klassisch (Athletenbeurteilung + Coachesinputs mit TG2)","typ":"modul","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":3}},{"name":"Klassisch (Coach the Coach mit TG3)","typ":"modul","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":2}},{"name":"Kursabend (Escape Game)","typ":"modul","mittelwert":4.83,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":5}},{"name":"Coaches Shadowing","typ":"modul","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":2}},{"name":"Umfeldmanagement (Sportschule)","typ":"modul","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":4}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.83,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":5}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.83,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":5}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.83,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":5}}],"kommentare":[]},{"id":"Feedback_Einf_Leistungssport_SWSK_74_26","kurs":"Einführung Leistungssport","kurs_code":"SWSK 74.26","datum_text":"06.-09. Juni 2026","saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":6,"gesamt":4.27,"score_kern":4.67,"score_modul":4.12,"score_orga":4.39,"anteil_kritisch":0.0,"anteil_top":45.8,"hinweise":"Titelzeile der Datei nennt den Kurscode 'SWSK 74.36', der Dateiname 'SWSK 74.26' – Abweichung in der Quelle. Fussnote in der Datei: 'Von 7 TN haben 6 an der Umfrage teilgenommen'. Die Zeile mit den =AVERAGE()-Formeln wurde nicht als Antwort gezählt; alle Mittelwerte wurden aus den 6 Rohzeilen neu berechnet und stimmen mit den Formelwerten überein. Freitextspalten 'Sonstige Anmerkungen zum Inhalt' und 'Sonstige Anmerkungen zur Organisation oder anderem' waren leer.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.67,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":4}},{"name":"Methodik","typ":"kern","mittelwert":4.83,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":5}},{"name":"Fachlich","typ":"kern","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":3}},{"name":"3 Grundtechniken Psyche","typ":"modul","mittelwert":4.67,"n":6,"verteilung":{"1":0,"2":0,"3":1,"4":0,"5":5}},{"name":"4 Entwicklungsfaktoren Psyche","typ":"modul","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":2,"4":0,"5":4}},{"name":"Zielsetzungen","typ":"modul","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":3}},{"name":"Mindset","typ":"modul","mittelwert":4.67,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":4}},{"name":"Feedback","typ":"modul","mittelwert":4.67,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":4}},{"name":"Fallberatung","typ":"modul","mittelwert":3.33,"n":6,"verteilung":{"1":0,"2":0,"3":4,"4":2,"5":0}},{"name":"Präsentieren/Referieren","typ":"modul","mittelwert":3.67,"n":6,"verteilung":{"1":0,"2":0,"3":2,"4":4,"5":0}},{"name":"Krisenkommunikation","typ":"modul","mittelwert":3.83,"n":6,"verteilung":{"1":0,"2":0,"3":3,"4":1,"5":2}},{"name":"Argumentieren/Qualifizieren","typ":"modul","mittelwert":3.17,"n":6,"verteilung":{"1":0,"2":0,"3":5,"4":1,"5":0}},{"name":"NWF Konzept","typ":"modul","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":2}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":1,"4":2,"5":3}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.33,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":2}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.5,"n":6,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":3}}],"kommentare":[]},{"id":"Feedback_Einf__Leist__SWSK_28_26","kurs":"Einführung Leistungssport","kurs_code":"SWSK 28.26","datum_text":null,"saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":26,"gesamt":4.18,"score_kern":4.32,"score_modul":4.11,"score_orga":4.26,"anteil_kritisch":2.8,"anteil_top":37.9,"hinweise":"Fussnote in der Datei: von 31 TN haben 26 an der Umfrage teilgenommen. AVERAGE- und ROUND-Zeile nicht als Antworten gezählt; Mittelwerte aus den 26 Rohzeilen neu berechnet und mit den Formelwerten abgeglichen. Kein Kursdatum in der Datei. Nur ein Freitextfeld (Organisation/anderes). Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.35,"n":26,"verteilung":{"1":0,"2":0,"3":2,"4":13,"5":11}},{"name":"Methodik","typ":"kern","mittelwert":4.23,"n":26,"verteilung":{"1":0,"2":1,"3":1,"4":15,"5":9}},{"name":"Fachlich","typ":"kern","mittelwert":4.38,"n":26,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":12}},{"name":"Psychologische Trainingsformen","typ":"modul","mittelwert":4.31,"n":26,"verteilung":{"1":0,"2":0,"3":5,"4":8,"5":13}},{"name":"Zielsetzung","typ":"modul","mittelwert":4.38,"n":26,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":12}},{"name":"Mindset","typ":"modul","mittelwert":4.15,"n":26,"verteilung":{"1":0,"2":0,"3":4,"4":14,"5":8}},{"name":"Fallberatung","typ":"modul","mittelwert":4.38,"n":26,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":12}},{"name":"Präsentieren/Referieren","typ":"modul","mittelwert":3.88,"n":26,"verteilung":{"1":0,"2":1,"3":7,"4":12,"5":6}},{"name":"Krisenkommunikation","typ":"modul","mittelwert":4.12,"n":26,"verteilung":{"1":0,"2":0,"3":4,"4":15,"5":7}},{"name":"Argumentieren & Qualifizieren","typ":"modul","mittelwert":4.0,"n":26,"verteilung":{"1":0,"2":0,"3":6,"4":14,"5":6}},{"name":"Transfert (Video)","typ":"modul","mittelwert":3.92,"n":26,"verteilung":{"1":0,"2":1,"3":7,"4":11,"5":7}},{"name":"NWF / Nachwuchsförderung","typ":"modul","mittelwert":3.81,"n":26,"verteilung":{"1":1,"2":3,"3":4,"4":10,"5":8}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.27,"n":26,"verteilung":{"1":0,"2":1,"3":4,"4":8,"5":13}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.15,"n":26,"verteilung":{"1":1,"2":1,"3":2,"4":11,"5":11}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.35,"n":26,"verteilung":{"1":0,"2":1,"3":2,"4":10,"5":13}}],"kommentare":[]},{"id":"Feedback_Physis_Foundation_SWSK_25.26","kurs":"Physis Foundation","kurs_code":"SWSK 25.26","datum_text":"13.-14. Juni 2026","saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":17,"gesamt":4.36,"score_kern":4.51,"score_modul":4.15,"score_orga":4.63,"anteil_kritisch":3.9,"anteil_top":52.9,"hinweise":"Von 19 TN haben 17 Personen die Umfrage ausgefüllt. Zwei Mittelwertzeilen am Ende nicht als Antworten gezählt. Spalte 'Zeitpunkt der letzten Änderung' (leer) ignoriert. Eine Antwort bewertet mehrere Module durchgehend mit 1 (Ausreisser).","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.65,"n":17,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":12}},{"name":"Methodik","typ":"kern","mittelwert":4.41,"n":17,"verteilung":{"1":0,"2":0,"3":2,"4":6,"5":9}},{"name":"Fachlich","typ":"kern","mittelwert":4.47,"n":17,"verteilung":{"1":0,"2":1,"3":2,"4":2,"5":12}},{"name":"Theorie & Gruppenarbeit Off-Snow Training","typ":"modul","mittelwert":3.94,"n":17,"verteilung":{"1":0,"2":1,"3":3,"4":9,"5":4}},{"name":"Praxis Turnen","typ":"modul","mittelwert":4.06,"n":17,"verteilung":{"1":1,"2":0,"3":3,"4":6,"5":7}},{"name":"Praxis Leichtathletik","typ":"modul","mittelwert":4.12,"n":17,"verteilung":{"1":1,"2":0,"3":1,"4":9,"5":6}},{"name":"Planung & Durchführung einer Trainingseinheit","typ":"modul","mittelwert":4.29,"n":17,"verteilung":{"1":0,"2":1,"3":1,"4":7,"5":8}},{"name":"Praxis Radsport","typ":"modul","mittelwert":4.24,"n":17,"verteilung":{"1":1,"2":0,"3":1,"4":7,"5":8}},{"name":"Praxis Rollen & Gleiten","typ":"modul","mittelwert":4.24,"n":17,"verteilung":{"1":1,"2":1,"3":0,"4":6,"5":9}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.47,"n":17,"verteilung":{"1":0,"2":0,"3":1,"4":7,"5":9}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.65,"n":17,"verteilung":{"1":0,"2":0,"3":0,"4":6,"5":11}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.76,"n":17,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":13}}],"kommentare":[]},{"id":"Feedback_Physis_Foundation_SWSK_26.26","kurs":"Physis Foundation","kurs_code":"SWSK 26.26","datum_text":null,"saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":23,"gesamt":4.35,"score_kern":4.42,"score_modul":4.2,"score_orga":4.58,"anteil_kritisch":1.4,"anteil_top":48.2,"hinweise":"Es haben 23 TN an der Umfrage teilgenommen, insgesamt waren 30 TN am Kurs anwesend. Zeilen 'Durchschnitt' und 'Gerundet' nicht als Antworten gezählt. Leere Hilfsspalte 'Spalte1' ignoriert. Kein Kursdatum in der Datei. Die Freitextspalte fasst Anmerkungen zu Inhalt und Organisation zusammen; Themen wurden inhaltlich zugeordnet.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.35,"n":23,"verteilung":{"1":0,"2":0,"3":3,"4":9,"5":11}},{"name":"Methodik","typ":"kern","mittelwert":4.35,"n":23,"verteilung":{"1":0,"2":0,"3":1,"4":13,"5":9}},{"name":"Fachlich","typ":"kern","mittelwert":4.57,"n":23,"verteilung":{"1":0,"2":0,"3":1,"4":8,"5":14}},{"name":"Theorie & Gruppenarbeit Off-Snow Training","typ":"modul","mittelwert":4.0,"n":23,"verteilung":{"1":0,"2":1,"3":5,"4":10,"5":7}},{"name":"Praxis Turnen","typ":"modul","mittelwert":4.26,"n":23,"verteilung":{"1":0,"2":0,"3":3,"4":11,"5":9}},{"name":"Praxis Leichtathletik","typ":"modul","mittelwert":4.09,"n":23,"verteilung":{"1":0,"2":2,"3":4,"4":7,"5":10}},{"name":"Planung & Durchführung einer Trainingseinheit","typ":"modul","mittelwert":4.35,"n":23,"verteilung":{"1":0,"2":0,"3":3,"4":9,"5":11}},{"name":"Praxis Radsport","typ":"modul","mittelwert":4.22,"n":23,"verteilung":{"1":0,"2":1,"3":1,"4":13,"5":8}},{"name":"Praxis Rollen & Gleiten","typ":"modul","mittelwert":4.3,"n":23,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":9}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.48,"n":23,"verteilung":{"1":0,"2":0,"3":3,"4":6,"5":14}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.7,"n":23,"verteilung":{"1":0,"2":0,"3":1,"4":5,"5":17}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.57,"n":23,"verteilung":{"1":0,"2":0,"3":1,"4":8,"5":14}}],"kommentare":[]},{"id":"Feedback_Physis_Foundation_SWSK_27.26","kurs":"Physis Foundation","kurs_code":"SWSK 27.26","datum_text":null,"saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":44,"gesamt":4.41,"score_kern":4.67,"score_modul":4.19,"score_orga":4.59,"anteil_kritisch":1.7,"anteil_top":54.4,"hinweise":"Hinweis in der Datei: von 46 TN haben 44 an der Umfrage teilgenommen. AVERAGE- und ROUND-Zeile nicht als Antworten gezählt. Kein Kursdatum in der Datei. Nur ein Freitextfeld; Platzhalter-Einträge ('..', '-') weggelassen. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.61,"n":44,"verteilung":{"1":0,"2":0,"3":3,"4":11,"5":30}},{"name":"Methodik","typ":"kern","mittelwert":4.57,"n":44,"verteilung":{"1":0,"2":0,"3":4,"4":11,"5":29}},{"name":"Fachlich","typ":"kern","mittelwert":4.82,"n":44,"verteilung":{"1":0,"2":0,"3":1,"4":6,"5":37}},{"name":"Theorie & Gruppenarbeit Off-Snow Training","typ":"modul","mittelwert":3.95,"n":44,"verteilung":{"1":0,"2":4,"3":6,"4":22,"5":12}},{"name":"Praxis Turnen","typ":"modul","mittelwert":4.32,"n":44,"verteilung":{"1":0,"2":0,"3":6,"4":18,"5":20}},{"name":"Praxis Leichtathletik","typ":"modul","mittelwert":4.27,"n":44,"verteilung":{"1":0,"2":0,"3":7,"4":18,"5":19}},{"name":"Planung & Durchführung einer Trainingseinheit","typ":"modul","mittelwert":4.27,"n":44,"verteilung":{"1":0,"2":1,"3":4,"4":21,"5":18}},{"name":"Praxis Radsport","typ":"modul","mittelwert":4.14,"n":44,"verteilung":{"1":0,"2":0,"3":10,"4":18,"5":16}},{"name":"Praxis Rollen & Gleiten","typ":"modul","mittelwert":4.2,"n":44,"verteilung":{"1":0,"2":2,"3":6,"4":17,"5":19}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.43,"n":44,"verteilung":{"1":0,"2":2,"3":1,"4":17,"5":24}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.64,"n":44,"verteilung":{"1":0,"2":0,"3":2,"4":12,"5":30}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.7,"n":44,"verteilung":{"1":0,"2":0,"3":2,"4":9,"5":33}}],"kommentare":[]},{"id":"Feedback_Physis_TalentSWSK_49.26","kurs":"Physis Talent","kurs_code":"SWSK 49.26","datum_text":null,"saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":23,"gesamt":4.28,"score_kern":4.29,"score_modul":4.06,"score_orga":4.7,"anteil_kritisch":4.3,"anteil_top":48.9,"hinweise":"23 von 24 Teilnehmenden haben die Umfrage ausgefüllt. Zwei Mittelwertzeilen (AVERAGE/ROUND) nicht als Antworten gezählt. Kein Kursdatum in der Datei. Nur eine Freitextspalte; Themen wurden inhaltlich zugeordnet. Mehrfach genannte Kritik: Zeitmanagement/Überziehen sowie zu hohe theoretische Dichte für TN ohne Sportvorwissen; ein Feedback fordert Queranerkennung eines Sportstudiums.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.43,"n":23,"verteilung":{"1":0,"2":2,"3":0,"4":7,"5":14}},{"name":"Methodik","typ":"kern","mittelwert":4.09,"n":23,"verteilung":{"1":1,"2":1,"3":1,"4":12,"5":8}},{"name":"Fachlich","typ":"kern","mittelwert":4.35,"n":23,"verteilung":{"1":1,"2":1,"3":0,"4":8,"5":13}},{"name":"Theorie Trainingsplanung","typ":"modul","mittelwert":4.13,"n":23,"verteilung":{"1":0,"2":1,"3":4,"4":9,"5":9}},{"name":"Schnelligkeit/Schnellkraft","typ":"modul","mittelwert":4.04,"n":23,"verteilung":{"1":0,"2":0,"3":6,"4":10,"5":7}},{"name":"Präventive Kraft","typ":"modul","mittelwert":4.17,"n":23,"verteilung":{"1":0,"2":0,"3":5,"4":9,"5":9}},{"name":"Langhantel & Skills Kraft","typ":"modul","mittelwert":4.17,"n":23,"verteilung":{"1":0,"2":1,"3":5,"4":6,"5":11}},{"name":"Präsentation Trainingsplanung","typ":"modul","mittelwert":3.83,"n":23,"verteilung":{"1":0,"2":3,"3":4,"4":10,"5":6}},{"name":"Ausdauer","typ":"modul","mittelwert":4.0,"n":23,"verteilung":{"1":1,"2":0,"3":6,"4":7,"5":9}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.83,"n":23,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":19}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.65,"n":23,"verteilung":{"1":0,"2":0,"3":0,"4":8,"5":15}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.61,"n":23,"verteilung":{"1":0,"2":0,"3":1,"4":7,"5":15}}],"kommentare":[]},{"id":"Feedback_Physis_Talent_SWSK_24.26","kurs":"Physis Talent","kurs_code":"SWSK 24.26","datum_text":null,"saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":32,"gesamt":4.4,"score_kern":4.54,"score_modul":4.25,"score_orga":4.59,"anteil_kritisch":2.6,"anteil_top":55.9,"hinweise":"Drei nach Sportart getrennte Blätter (Alpin/Cross 21, Freestyle 3, Nordisch 8 Antworten) mit je eigener Mittelwertzeile; hier zusammengeführt. Gleichnamige Module zusammengelegt ('Skills Kraft' Alpin = 'Kraft spezifisch' Nordisch = 'Kraft Freestyle spezifisch'; 'Schnelligkeit' Freestyle = 'Schnelligkeit & Sprünge'). Freestyle-spezifische Module (Akrobatik, Trampolin) nur mit n=3. Gesamtblatt nennt 31 von 49 TN, die Einzelblätter summieren sich auf 32 – Abweichung in der Quelle. Nicht-numerische Spalte 'Sportart' (Nordisch) und ID-Spalte (Freestyle) weggelassen. Kein Kursdatum in der Datei. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.66,"n":32,"verteilung":{"1":0,"2":0,"3":1,"4":9,"5":22}},{"name":"Methodik","typ":"kern","mittelwert":4.41,"n":32,"verteilung":{"1":0,"2":0,"3":3,"4":13,"5":16}},{"name":"Fachlich","typ":"kern","mittelwert":4.56,"n":32,"verteilung":{"1":0,"2":1,"3":2,"4":7,"5":22}},{"name":"FTEM & Planung","typ":"modul","mittelwert":4.13,"n":32,"verteilung":{"1":0,"2":2,"3":6,"4":10,"5":14}},{"name":"Schnelligkeit & Sprünge","typ":"modul","mittelwert":4.03,"n":32,"verteilung":{"1":0,"2":2,"3":4,"4":17,"5":9}},{"name":"Rumpf & Hamstrings","typ":"modul","mittelwert":4.66,"n":32,"verteilung":{"1":0,"2":0,"3":3,"4":5,"5":24}},{"name":"Langhantel","typ":"modul","mittelwert":4.44,"n":32,"verteilung":{"1":0,"2":1,"3":4,"4":7,"5":20}},{"name":"Kraft spezifisch / Skills Kraft","typ":"modul","mittelwert":4.25,"n":32,"verteilung":{"1":0,"2":1,"3":6,"4":9,"5":16}},{"name":"Präsentation Planungen","typ":"modul","mittelwert":4.19,"n":32,"verteilung":{"1":0,"2":2,"3":2,"4":16,"5":12}},{"name":"Ausdauer & Regeneration","typ":"modul","mittelwert":4.06,"n":32,"verteilung":{"1":0,"2":2,"3":9,"4":6,"5":15}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.66,"n":32,"verteilung":{"1":0,"2":0,"3":2,"4":7,"5":23}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.56,"n":32,"verteilung":{"1":0,"2":0,"3":2,"4":10,"5":20}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":4.56,"n":32,"verteilung":{"1":0,"2":0,"3":2,"4":10,"5":20}},{"name":"Akrobatik Boden Methodik und TCU","typ":"modul","mittelwert":4.0,"n":3,"verteilung":{"1":0,"2":0,"3":1,"4":1,"5":1}},{"name":"Trampolin & Nebenposten","typ":"modul","mittelwert":4.67,"n":3,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":2}}],"kommentare":[]},{"id":"Feedback_Trampolin_anwenden_1_SWSK_22.26","kurs":"Trampolin anwenden 1","kurs_code":"SWSK 22.26","datum_text":null,"saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":13,"gesamt":4.83,"score_kern":4.87,"score_modul":4.67,"score_orga":4.95,"anteil_kritisch":0.0,"anteil_top":84.6,"hinweise":"Manuell nachbearbeiteter Forms-Export; Durchschnitts- und Rundungszeile nicht als Antworten gezählt. Zwei Freitextblöcke (Inhalt / Organisation) unterhalb der Bewertungstabelle. Trampolinkurs ohne eindeutige Sportartzuordnung, daher sportartübergreifend. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Methodik","typ":"kern","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Fachlich","typ":"kern","mittelwert":4.92,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":1,"5":12}},{"name":"Basis- und Sicherheitssprünge","typ":"modul","mittelwert":4.69,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":4,"5":9}},{"name":"Aufbau der Tricks","typ":"modul","mittelwert":5.0,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":13}},{"name":"Gruppenarbeit","typ":"modul","mittelwert":4.31,"n":13,"verteilung":{"1":0,"2":0,"3":2,"4":5,"5":6}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":4.85,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":11}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":5.0,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":13}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":5.0,"n":13,"verteilung":{"1":0,"2":0,"3":0,"4":0,"5":13}}],"kommentare":[]},{"id":"Feedback_Trampolin_anwenden_1_SWSK_72.26","kurs":"Trampolin anwenden 1","kurs_code":"SWSK 72.26","datum_text":null,"saison":"2026/27","kategorie":"SWSK","sportart":"sportartübergreifend","n_antworten":11,"gesamt":4.35,"score_kern":4.4,"score_modul":4.67,"score_orga":4.0,"anteil_kritisch":2.0,"anteil_top":54.5,"hinweise":"Reduzierter Export ohne Titel- und Hinweiszeilen: 11 Antwortzeilen, Mittelwertzeile nicht als Antwort gezählt. Zwei Freitextblöcke (Inhalt / Organisation) unterhalb der Bewertungstabelle. Trampolinkurs ohne eindeutige Sportartzuordnung, daher sportartübergreifend (wie SWSK 22.26). Kein Kursdatum in der Datei. Keine Frage zur Rolle der Kursleitung.","dimensionen":[{"name":"Organisation","typ":"kern","mittelwert":3.73,"n":11,"verteilung":{"1":0,"2":1,"3":3,"4":5,"5":2}},{"name":"Methodik","typ":"kern","mittelwert":4.64,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":2,"5":8}},{"name":"Fachlich","typ":"kern","mittelwert":4.82,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":0,"5":10}},{"name":"Basis- und Sicherheitssprünge","typ":"modul","mittelwert":4.73,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":3,"5":8}},{"name":"Aufbau der Tricks","typ":"modul","mittelwert":4.82,"n":11,"verteilung":{"1":0,"2":0,"3":0,"4":2,"5":9}},{"name":"Gruppenarbeit","typ":"modul","mittelwert":4.45,"n":11,"verteilung":{"1":0,"2":0,"3":1,"4":4,"5":6}},{"name":"Infos rechtzeitig & vollständig","typ":"orga_detail","mittelwert":3.91,"n":11,"verteilung":{"1":0,"2":0,"3":4,"4":4,"5":3}},{"name":"Infos verständlich","typ":"orga_detail","mittelwert":4.18,"n":11,"verteilung":{"1":0,"2":0,"3":2,"4":5,"5":4}},{"name":"Gesamtorganisation positiv","typ":"orga_detail","mittelwert":3.91,"n":11,"verteilung":{"1":0,"2":1,"3":3,"4":3,"5":4}}],"kommentare":[]}]};
+let BUILD = "18.11.2026";
+
+const S = {saison:new Set(), sportart:new Set(), kurs:'',
+           sort:'note', mx:'sportart', ton:new Set(), thema:new Set(), tsort:'gesamt', tdir:-1};
+const ORD = ['--v1','--v2','--v3','--v4','--v5'];
+const KERN = ['Organisation','Methodik','Fachlich','Kursleitung'];
+const ORGA = ['Infos rechtzeitig & vollständig','Infos verständlich','Gesamtorganisation positiv'];
+
+const nf = (x,d=2)=> x==null? '–' : x.toFixed(d).replace('.',',');
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function filtered(){
+  return DATA.kurse.filter(k=>
+    (!S.saison.size    || S.saison.has(k.saison)) &&
+    (!S.sportart.size  || S.sportart.has(k.sportart)) &&
+    (!S.kurs || k.kurs === S.kurs)
+  );
+}
+function wmean(pairs){
+  const v = pairs.filter(p=>p[0]!=null && p[1]>0);
+  if(!v.length) return null;
+  return v.reduce((a,p)=>a+p[0]*p[1],0)/v.reduce((a,p)=>a+p[1],0);
+}
+function dimAvg(kurse,name,typ){
+  const p=[]; let kn=0;
+  kurse.forEach(k=>k.dimensionen.forEach(d=>{ if(d.name===name&&d.typ===typ&&d.mittelwert!=null&&d.n){p.push([d.mittelwert,d.n]);kn++;} }));
+  return p.length? {mw:wmean(p), n:p.reduce((a,x)=>a+x[1],0), kurse:kn} : null;
+}
+function verteilung(kurse){
+  const v=[0,0,0,0,0];
+  kurse.forEach(k=>k.dimensionen.forEach(d=>{for(let i=1;i<=5;i++) v[i-1]+=(d.verteilung[i]||0);}));
+  return v;
+}
+function summary(kurse){
+  const v=verteilung(kurse), tot=v.reduce((a,b)=>a+b,0);
+  return {kurse:kurse.length, antworten:kurse.reduce((a,k)=>a+k.n_antworten,0), bewertungen:tot,
+    gesamt:wmean(kurse.map(k=>[k.gesamt,k.n_antworten])),
+    kritisch: tot? (v[0]+v[1])/tot*100 : null, top: tot? v[4]/tot*100 : null, verteilung:v};
+}
+
+/* Stützstellen alle 0,5 Notenpunkte. Feinere Abstufung als eine reine 1-2-3-4-5-Rampe:
+   dadurch sind auch Unterschiede von 0,2 Notenpunkten im oberen Bereich sichtbar,
+   in dem die realen Kurswerte liegen. Verankerung bleibt 1 = rot, 3 = neutral, 5 = grün. */
+const VSTOPS = [[1,'#7a000e'],[1.5,'#b00014'],[2,'#e3001b'],[2.5,'#f0a08a'],[3,'#d5cdca'],
+                [3.5,'#b6e3cb'],[4,'#7ccda4'],[4.5,'#3f8f63'],[5,'#0b4526']];
+const hex2rgb = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const rgb2hex = c => '#'+c.map(x=>Math.round(Math.max(0,Math.min(255,x))).toString(16).padStart(2,'0')).join('');
+function valColor(v){
+  if(v==null) return null;
+  const t=Math.max(1,Math.min(5,v));
+  for(let i=0;i<VSTOPS.length-1;i++){
+    if(t<=VSTOPS[i+1][0]){
+      const f=(t-VSTOPS[i][0])/(VSTOPS[i+1][0]-VSTOPS[i][0]);
+      const a=hex2rgb(VSTOPS[i][1]), b=hex2rgb(VSTOPS[i+1][1]);
+      return rgb2hex(a.map((x,k)=>x+(b[k]-x)*f));
+    }
+  }
+  return VSTOPS[VSTOPS.length-1][1];
+}
+function valInk(v){
+  const [r,g,bl]=hex2rgb(valColor(v));
+  return (0.2126*r+0.7152*g+0.0722*bl)/255 < 0.45 ? '#fff' : 'var(--ink)';
+}
+
+const tip=document.getElementById('tip');
+function bindTip(el,html){
+  el.addEventListener('mouseenter',()=>{tip.innerHTML=html;tip.style.opacity=1;});
+  el.addEventListener('mousemove',e=>{
+    const w=tip.offsetWidth,h=tip.offsetHeight;
+    tip.style.left=Math.min(e.clientX+14, innerWidth-w-10)+'px';
+    tip.style.top=Math.max(8, e.clientY-h-12)+'px';
+  });
+  el.addEventListener('mouseleave',()=>tip.style.opacity=0);
+}
+function chips(host,values,set,onchange){
+  host.innerHTML='';
+  values.forEach(v=>{
+    const b=document.createElement('button');
+    b.className='chip'; b.type='button'; b.textContent=v;
+    b.setAttribute('aria-pressed', set.has(v));
+    b.onclick=()=>{ set.has(v)?set.delete(v):set.add(v); b.setAttribute('aria-pressed',set.has(v)); onchange(); };
+    host.appendChild(b);
+  });
+}
+function radio(host,values,key,onchange){
+  host.innerHTML='';
+  values.forEach(([val,lab])=>{
+    const b=document.createElement('button');
+    b.className='chip'; b.type='button'; b.textContent=lab; b.dataset.v=val;
+    b.setAttribute('aria-pressed', S[key]===val);
+    b.onclick=()=>{
+      S[key]=val;
+      host.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed', c.dataset.v===val));
+      onchange();
+    };
+    host.appendChild(b);
+  });
+}
+function toggleSaison(j){
+  S.saison.has(j)? S.saison.delete(j) : S.saison.add(j);
+  chips(document.getElementById('f-saison'),DATA.meta.saisons,S.saison,render);
+  render();
+}
+
+/* Balkendiagramm, Skala 1–5. rows: {label,wert,n,soft,onclick,tip} oder {gruppe:'…'} */
+function barChart(host,rows,opts={}){
+  const labw=opts.labw||230;
+  host.style.setProperty('--labw',labw+'px');
+  host.innerHTML='';
+  if(!rows.length){ host.innerHTML='<p class="empty">Keine Daten für diese Auswahl.</p>'; return; }
+  rows.forEach(r=>{
+    if(r.gruppe){ const g=document.createElement('div'); g.className='grp-label'; g.textContent=r.gruppe; host.appendChild(g); return; }
+    const row=document.createElement('div'); row.className='barrow';
+    const pct = r.wert==null? 0 : Math.max(0,(r.wert-1)/4*100);
+    row.innerHTML =
+      `<div class="lab${r.onclick?' click':''}" title="${esc(r.label)}">${esc(r.label)}${r.soft?' ⚠':''}</div>`+
+      `<div class="track"><div class="bar${r.soft?' soft':''}" style="width:${pct}%;background:${valColor(r.wert)||'var(--v3)'}"></div></div>`+
+      `<div class="barval">${nf(r.wert)}${r.n!=null?` <span class="n">n=${r.n}</span>`:''}</div>`;
+    bindTip(row.querySelector('.bar'), r.tip || `<b>${esc(r.label)}</b><br>Ø ${nf(r.wert)} von 5${r.n!=null?`<br>${r.n} Bewertungen`:''}`);
+    if(r.onclick) row.querySelector('.lab').onclick=r.onclick;
+    host.appendChild(row);
+  });
+  const ax=document.createElement('div'); ax.className='scaleaxis';
+  ax.innerHTML='<div></div><div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div><div></div>';
+  host.appendChild(ax);
+}
+
+function renderKPIs(s){
+  const dK=DATA.je_saison, saisons=DATA.meta.saisons;
+  document.getElementById('kpis').innerHTML =
+    `<div class="kpi hero-num"><div class="lab">Gesamtnote</div><div class="val">${nf(s.gesamt)}<small> / 5</small></div>
+       <div class="dlt">${s.bewertungen.toLocaleString('de-CH')} Einzelbewertungen</div></div>`+
+    `<div class="kpi"><div class="lab">Kurse</div><div class="val">${s.kurse}</div><div class="dlt">von ${DATA.meta.kurse_total} total</div></div>`+
+    `<div class="kpi"><div class="lab">Rückmeldungen</div><div class="val">${s.antworten}</div><div class="dlt">Ø ${(s.antworten/(s.kurse||1)).toFixed(1).replace('.',',')} pro Kurs</div></div>`+
+    `<div class="kpi"><div class="lab">Note 5 vergeben</div><div class="val">${s.top==null?'–':Math.round(s.top)}<small>%</small></div><div class="dlt">aller Einzelbewertungen</div></div>`+
+    `<div class="kpi"><div class="lab">Kritisch · Note 1–2</div><div class="val">${s.kritisch==null?'–':nf(s.kritisch,1)}<small>%</small></div>
+       <div class="dlt">alle Kurse – ${saisons.map(x=>x+': '+nf(dK[x].anteil_kritisch,1)+'%').join(' · ')}</div></div>`;
+}
+
+function renderDims(kurse){
+  const rows=[];
+  const kern=[];
+  KERN.forEach(n=>{ const a=dimAvg(kurse,n,'kern'); if(a) kern.push({label:n,wert:a.mw,n:a.n,
+    tip:`<b>${esc(n)}</b><br>Ø ${nf(a.mw)} von 5<br>${a.n} Bewertungen aus ${a.kurse} Kursen`}); });
+  if(kern.length){ rows.push({gruppe:'Kerndimensionen'}); rows.push(...kern); }
+  const m=kurse.flatMap(k=>k.dimensionen.filter(d=>d.typ==='modul'&&d.mittelwert!=null&&d.n).map(d=>[d.mittelwert,d.n]));
+  if(m.length){ rows.push({gruppe:'Inhaltliche Module'});
+    rows.push({label:'Alle Modulfragen zusammen',wert:wmean(m),n:m.reduce((a,x)=>a+x[1],0),
+      tip:`<b>Inhaltliche Module</b><br>Mittel über alle kursspezifischen Inhaltsblöcke<br>Ø ${nf(wmean(m))} von 5`}); }
+  const orga=[];
+  ORGA.forEach(n=>{ const a=dimAvg(kurse,n,'orga_detail'); if(a) orga.push({label:n,wert:a.mw,n:a.n,
+    tip:`<b>${esc(n)}</b><br>Ø ${nf(a.mw)} von 5<br>${a.n} Bewertungen aus ${a.kurse} Kursen`}); });
+  if(orga.length){ rows.push({gruppe:'Organisation im Detail'}); rows.push(...orga); }
+  barChart(document.getElementById('c-dims'),rows,{labw:250});
+}
+
+function renderVerteilung(kurse){
+  const host=document.getElementById('c-verteilung');
+  host.style.setProperty('--labw','230px');
+  document.getElementById('l-verteilung').innerHTML=
+    [1,2,3,4,5].map((i,ix)=>`<span class="item"><span class="swatch" style="background:var(${ORD[ix]})"></span>Note ${i}</span>`).join('');
+  const groups=[['Alle gefilterten Kurse',kurse]];
+  DATA.meta.saisons.forEach(s=>{ const g=kurse.filter(k=>k.saison===s); if(g.length) groups.push(['Kursjahr '+s,g]); });
+  host.innerHTML='';
+  if(!kurse.length){ host.innerHTML='<p class="empty">Keine Daten für diese Auswahl.</p>'; return; }
+  groups.forEach(([lab,g])=>{
+    const v=verteilung(g), tot=v.reduce((a,b)=>a+b,0)||1;
+    const row=document.createElement('div'); row.className='stackrow';
+    row.innerHTML=`<div class="lab" style="font-size:13px;color:var(--ink-soft);text-align:right;font-weight:600">${esc(lab)}</div>`+
+      `<div class="stack">${v.map((n,i)=>`<div class="seg" data-i="${i}" data-n="${n}" style="width:${n/tot*100}%;background:var(${ORD[i]})"></div>`).join('')}</div>`+
+      `<div class="barval">${tot.toLocaleString('de-CH')}</div>`;
+    row.querySelectorAll('.seg').forEach(sg=>{
+      const i=+sg.dataset.i,n=+sg.dataset.n;
+      bindTip(sg,`<b>Note ${i+1}</b><br>${n} Bewertungen · ${(n/tot*100).toFixed(1).replace('.',',')}%<br>${esc(lab)}`);
+    });
+    host.appendChild(row);
+  });
+}
+
+/* Kursdatum aus datum_text (z. B. "16.-19. Juni 2026", "08.-13. Februar 2026", "16.06.2026"):
+   massgeblich ist der letzte Kurstag. Ohne Datum -> null. */
+const MONATE={januar:1,februar:2,'märz':3,maerz:3,april:4,mai:5,juni:6,juli:7,august:8,september:9,oktober:10,november:11,dezember:12};
+function kursDatum(k){
+  const s=(k.datum_text||'').toLowerCase();
+  if(!s) return null;
+  let m, last=null;
+  const reN=/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/g;
+  while((m=reN.exec(s))) last=new Date(+(m[3].length===2?'20'+m[3]:m[3]), +m[2]-1, +m[1]);
+  if(last) return last.getTime();
+  const reM=/(\d{1,2})\.?\s*([a-zäöü]+)\s+(\d{4})/g;
+  while((m=reM.exec(s))) if(MONATE[m[2]]) last=new Date(+m[3], MONATE[m[2]]-1, +m[1]);
+  return last? last.getTime() : null;
+}
+const kurzDatum=ts=>{ const d=new Date(ts); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getFullYear()).slice(2); };
+// Datumssortierung: Kurse mit Datum zuerst (nach Datum), danach Kurse ohne Datum nach Kursjahr und Name
+function datumSort(dir){
+  return (a,b)=>{
+    const da=kursDatum(a), db=kursDatum(b);
+    if(da!=null && db!=null) return dir*(da-db);
+    if(da!=null) return -1;
+    if(db!=null) return 1;
+    return dir*a.saison.localeCompare(b.saison) || a.kurs.localeCompare(b.kurs,'de');
+  };
+}
+
+function renderKurse(kurse){
+  const sorters={
+    datum:datumSort(-1),
+    datum_asc:datumSort(1),
+    note:(a,b)=>(b.gesamt||0)-(a.gesamt||0),
+    note_asc:(a,b)=>(a.gesamt||0)-(b.gesamt||0),
+    n:(a,b)=>b.n_antworten-a.n_antworten,
+    name:(a,b)=>a.kurs.localeCompare(b.kurs,'de'),
+    kritisch:(a,b)=>(b.anteil_kritisch||0)-(a.anteil_kritisch||0),
+  };
+  const nachDatum=S.sort==='datum'||S.sort==='datum_asc';
+  const ohne=kurse.filter(k=>kursDatum(k)==null).length;
+  document.getElementById('sorthint').textContent = nachDatum && ohne
+    ? `${kurse.length-ohne} von ${kurse.length} Kursen haben ein Kursdatum in der Quelldatei. Kurse ohne Datum («o. D.») folgen danach, sortiert nach Kursjahr.` : '';
+  const rows=[...kurse].sort(sorters[S.sort]||sorters.note).map(k=>({
+    label:`${nachDatum? (kursDatum(k)!=null? kurzDatum(kursDatum(k)) : 'o. D. '+k.saison)+' · ' : ''}${k.kurs}${k.kurs_code?' · '+k.kurs_code:''}`,
+    wert:k.gesamt, n:k.n_antworten, soft:k.n_antworten<10, onclick:()=>openDetail(k),
+    tip:`<b>${esc(k.kurs)}</b>${k.kurs_code?'<br>'+esc(k.kurs_code):''}<br>${k.saison} · ${esc(k.kategorie)} · ${esc(k.sportart)}`+
+        (k.datum_text?`<br>Kursdatum: ${esc(k.datum_text)}`:'')+
+        `<br>Gesamtnote ${nf(k.gesamt)} · ${k.n_antworten} Rückmeldungen`+
+        `<br>Note 1–2: ${nf(k.anteil_kritisch,1)}% der Bewertungen`+
+        (k.n_antworten<10?'<br>⚠ wenige Rückmeldungen':'')
+  }));
+  barChart(document.getElementById('c-kurse'),rows,{labw:330});
+}
+
+/* ---------- Matrix Gruppe x Kursjahr ---------- */
+function renderMatrix(kurse){
+  const t=document.getElementById('c-matrix');
+  const key=S.mx;
+  const jahre=DATA.meta.saisons.filter(j=>kurse.some(k=>k.saison===j));
+  const gruppen=[...new Set(kurse.map(k=>k[key]))].sort((a,b)=>a.localeCompare(b,'de'));
+  if(!gruppen.length || !jahre.length){ t.innerHTML='<tr><td class="empty">Keine Daten für diese Auswahl.</td></tr>'; document.getElementById('mxscale').innerHTML=''; return; }
+
+  const zelle=(ks)=>{
+    if(!ks.length) return null;
+    const mw=wmean(ks.map(k=>[k.gesamt,k.n_antworten]));
+    return {mw, n:ks.reduce((a,k)=>a+k.n_antworten,0), kurse:ks.length};
+  };
+  const rows=gruppen.map(g=>{
+    const je=jahre.map(j=>zelle(kurse.filter(k=>k[key]===g && k.saison===j)));
+    const ges=zelle(kurse.filter(k=>k[key]===g));
+    const erst=je.find(x=>x), letzt=[...je].reverse().find(x=>x);
+    const d=(je.length>1 && erst && letzt && erst!==letzt)? letzt.mw-erst.mw : null;
+    return {g, je, ges, d};
+  }).sort((a,b)=>(b.ges?.mw||0)-(a.ges?.mw||0));
+
+  const head='<tr><th class="rowhead">'+(key==='sportart'?'Sportart':'Kurstyp')+'</th>'+
+    jahre.map(j=>`<th>${j}</th>`).join('')+
+    (jahre.length>1?'<th>Δ</th>':'')+'<th>Gesamt</th></tr>';
+
+  const body=rows.map(r=>{
+    const cells=r.je.map((c,i)=>{
+      if(!c) return '<td><div class="cell empty"><span class="v">–</span></div></td>';
+      return `<td><div class="cell" data-tip="${esc(r.g)}|${jahre[i]}|${nf(c.mw)}|${c.n}|${c.kurse}" style="background:${valColor(c.mw)};color:${valInk(c.mw)}">`+
+             `<span class="v">${nf(c.mw)}</span><span class="n">n=${c.n}</span></div></td>`;
+    }).join('');
+    let dcell='';
+    if(jahre.length>1){
+      if(r.d==null) dcell='<td><div class="cell empty"><span class="v">–</span></div></td>';
+      else{
+        const cls=Math.abs(r.d)<0.05?'flat':(r.d>0?'up':'down');
+        const ico=cls==='flat'?'•':(r.d>0?'▲':'▼');
+        dcell=`<td><div class="cell delta ${cls}"><span class="v">${ico} ${r.d>0?'+':''}${nf(r.d)}</span><span class="n">Notenpunkte</span></div></td>`;
+      }
+    }
+    const gcell=r.ges? `<td><div class="cell" style="background:${valColor(r.ges.mw)};color:${valInk(r.ges.mw)}"><span class="v">${nf(r.ges.mw)}</span><span class="n">n=${r.ges.n}</span></div></td>`
+                     : '<td><div class="cell empty"><span class="v">–</span></div></td>';
+    return `<tr><td class="rowhead">${esc(r.g)}</td>${cells}${dcell}${gcell}</tr>`;
+  }).join('');
+
+  t.innerHTML=head+body;
+  t.querySelectorAll('.cell[data-tip]').forEach(c=>{
+    const [g,j,mw,n,kz]=c.dataset.tip.split('|');
+    bindTip(c,`<b>${esc(g)}</b> · ${j}<br>Ø ${mw} von 5<br>${n} Rückmeldungen aus ${kz} Kurs${kz==='1'?'':'en'}`);
+  });
+  document.getElementById('mxscale').innerHTML=
+    '<span>Notenskala</span><span>1</span>'+
+    Array.from({length:17},(_,i)=>1+i*0.25).map(v=>`<i style="background:${valColor(v)}"></i>`).join('')+'<span>5</span>';
+}
+
+/* ---------- Streudiagramm Bewertung x Rückmeldungen ---------- */
+function renderScatter(kurse){
+  const host=document.getElementById('c-scatter');
+  const leg=document.getElementById('l-scatter');
+  const jahre=DATA.meta.saisons;
+  // Farbe trägt die Note (einheitliche Skala), die Form das Kursjahr
+  const form=j=>jahre.indexOf(j)%4;
+  const marker=(f,cx,cy,fill,r=7)=>{
+    if(f===0) return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}"/>`;
+    if(f===1) return `<rect x="${cx-r*0.9}" y="${cy-r*0.9}" width="${r*1.8}" height="${r*1.8}" rx="1.5" fill="${fill}"/>`;
+    if(f===2) return `<path d="M${cx} ${cy-r*1.15}L${cx+r*1.15} ${cy}L${cx} ${cy+r*1.15}L${cx-r*1.15} ${cy}Z" fill="${fill}"/>`;
+    return `<path d="M${cx} ${cy-r*1.1}L${cx+r*1.05} ${cy+r*0.8}L${cx-r*1.05} ${cy+r*0.8}Z" fill="${fill}"/>`;
+  };
+  const keySvg=j=>`<svg width="15" height="15" viewBox="0 0 15 15" style="flex:none">${
+    marker(form(j),7.5,7.5,'none',5).replace('fill="none"','fill="none" class="sc-key"')}</svg>`;
+  leg.innerHTML = jahre.length>1
+    ? jahre.map(j=>`<button type="button" class="item click" data-j="${j}" aria-pressed="${S.saison.has(j)}" title="Kursjahr ${j} ein- oder ausblenden">${keySvg(j)}${j}</button>`).join('')
+      + (S.saison.size? '<span class="item" style="border-style:dashed">gefiltert – nochmals klicken zeigt wieder alle</span>' : '')
+      + '<span class="item" style="border-style:dashed">Farbe = Note, Form = Kursjahr</span>'
+    : '';
+  leg.querySelectorAll('.item.click').forEach(b=>b.onclick=()=>toggleSaison(b.dataset.j));
+
+  const pts=kurse.filter(k=>k.gesamt!=null);
+  if(!pts.length){ host.innerHTML='<p class="empty">Keine Daten für diese Auswahl.</p>'; return; }
+
+  const W=1000, H=430, ml=54, mr=18, mt=14, mb=54;
+  const iw=W-ml-mr, ih=H-mt-mb;
+  const minS=Math.min(...pts.map(p=>p.gesamt));
+  const x0=Math.min(3.5, Math.floor(minS*10)/10-0.1), x1=5;
+  const maxN=Math.max(...pts.map(p=>p.n_antworten));
+  const y1=Math.ceil(maxN/10)*10 || 10;
+  const X=v=>ml+(v-x0)/(x1-x0)*iw;
+  const Y=v=>mt+ih-(v/y1)*ih;
+
+  const xticks=[]; for(let v=Math.ceil(x0*10)/10; v<=x1+1e-9; v+=0.25) xticks.push(Math.round(v*100)/100);
+  const yticks=[]; for(let v=0; v<=y1; v+=(y1>40?20:10)) yticks.push(v);
+
+  const avg=wmean(pts.map(k=>[k.gesamt,k.n_antworten]));
+  const ns=[...pts.map(p=>p.n_antworten)].sort((a,b)=>a-b);
+  const med=ns.length%2? ns[(ns.length-1)/2] : (ns[ns.length/2-1]+ns[ns.length/2])/2;
+
+  const label=new Set([...pts].sort((a,b)=>a.gesamt-b.gesamt).slice(0,3).map(p=>p.id));
+
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Streudiagramm Gesamtnote gegen Anzahl Rückmeldungen">`;
+  yticks.forEach(v=>{ svg+=`<line class="sc-grid" x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}"/>`; });
+  xticks.forEach(v=>{ svg+=`<line class="sc-grid" x1="${X(v)}" x2="${X(v)}" y1="${mt}" y2="${mt+ih}"/>`; });
+  svg+=`<line class="sc-ref" x1="${X(avg)}" x2="${X(avg)}" y1="${mt}" y2="${mt+ih}"/>`;
+  svg+=`<line class="sc-ref" x1="${ml}" x2="${W-mr}" y1="${Y(med)}" y2="${Y(med)}"/>`;
+  svg+=`<text class="sc-reflab" x="${X(avg)+6}" y="${mt+11}">Ø ${nf(avg)}</text>`;
+  svg+=`<text class="sc-reflab" x="${W-mr}" y="${Y(med)-6}" text-anchor="end">Median ${med} Rückmeldungen</text>`;
+  svg+=`<line class="sc-axis" x1="${ml}" x2="${W-mr}" y1="${mt+ih}" y2="${mt+ih}"/>`;
+  svg+=`<line class="sc-axis" x1="${ml}" x2="${ml}" y1="${mt}" y2="${mt+ih}"/>`;
+  xticks.forEach(v=>{ svg+=`<text class="sc-tick" x="${X(v)}" y="${mt+ih+18}" text-anchor="middle">${nf(v,2).replace(',00',',0').replace(/,(\d)0$/,',$1')}</text>`; });
+  yticks.forEach(v=>{ svg+=`<text class="sc-tick" x="${ml-10}" y="${Y(v)+4}" text-anchor="end">${v}</text>`; });
+  svg+=`<text class="sc-axlab" x="${ml+iw/2}" y="${H-10}" text-anchor="middle">Gesamtnote</text>`;
+  svg+=`<text class="sc-axlab" transform="translate(14,${mt+ih/2}) rotate(-90)" text-anchor="middle">Rückmeldungen</text>`;
+
+  const gesetzt=[];
+  const alle=pts.map(k=>({x:X(k.gesamt), y:Y(k.n_antworten)}));
+  // Punkte, die sich überlagern, zu Gruppen zusammenfassen (Union-Find über 14 px Abstand)
+  const grp=pts.map((_,i)=>i);
+  const find=i=>grp[i]===i? i : (grp[i]=find(grp[i]));
+  pts.forEach((a,i)=>pts.forEach((b,j)=>{
+    if(j<=i) return;
+    const dx=alle[i].x-alle[j].x, dy=alle[i].y-alle[j].y;
+    if(Math.hypot(dx,dy)<14) grp[find(i)]=find(j);
+  }));
+  const cluster={};
+  pts.forEach((k,i)=>{ (cluster[find(i)] ||= []).push(k); });
+
+  [...pts].sort((a,b)=>a.n_antworten-b.n_antworten).forEach(k=>{
+    const cx=X(k.gesamt), cy=Y(k.n_antworten);
+    svg+=`<g class="sc-dot" data-id="${esc(k.id)}">${marker(form(k.saison),cx,cy,valColor(k.gesamt))}</g>`;
+    if(label.has(k.id)){
+      const links = cx > ml+iw*0.6;
+      const br = k.kurs.length*6.4;
+      const x0l = links? cx-12-br : cx+12, x1l = links? cx-12 : cx+12+br;
+      const frei = ly => !gesetzt.some(g=>Math.abs(g.y-ly)<14 && g.x1>x0l && g.x0<x1l)
+                      && !alle.some(d=>Math.abs(d.y-ly)<9 && d.x>x0l-8 && d.x<x1l+8 && Math.abs(d.x-cx)>1);
+      let ly=[cy+4, cy-14, cy+22, cy-30].find(frei) ?? cy+4;
+      gesetzt.push({x0:x0l, x1:x1l, y:ly});
+      if(ly!==cy+4){
+        svg+=`<line class="sc-lead" x1="${cx+(links?-9:9)}" y1="${cy}" x2="${cx+(links?-13:13)}" y2="${ly-4}"/>`;
+      }
+      svg+=`<text class="sc-lab" x="${cx+(links?-12:12)}" y="${ly}" text-anchor="${links?'end':'start'}">${esc(k.kurs)}</text>`;
+    }
+  });
+  Object.values(cluster).filter(g=>g.length>1).forEach(g=>{
+    const xs=g.map(k=>X(k.gesamt)), ys=g.map(k=>Y(k.n_antworten));
+    svg+=`<text class="sc-count" x="${Math.max(...xs)+10}" y="${Math.min(...ys)-4}">×${g.length}</text>`;
+  });
+  svg+='</svg>';
+  host.innerHTML=svg;
+  host.querySelectorAll('.sc-dot').forEach(g=>{
+    const k=pts.find(p=>p.id===g.dataset.id);
+    const geschwister=(Object.values(cluster).find(gr=>gr.includes(k))||[]).filter(x=>x!==k);
+    bindTip(g,`<b>${esc(k.kurs)}</b>${k.kurs_code?'<br>'+esc(k.kurs_code):''}<br>${k.saison} · ${esc(k.kategorie)} · ${esc(k.sportart)}`+
+              `<br>Gesamtnote ${nf(k.gesamt)} · ${k.n_antworten} Rückmeldungen<br>Note 1–2: ${nf(k.anteil_kritisch,1)}%`+
+              (geschwister.length? `<br><br><b>An fast gleicher Stelle:</b><br>`+
+                geschwister.map(x=>`${esc(x.kurs)}${x.kurs_code?' · '+esc(x.kurs_code):''} – ${nf(x.gesamt)} · n=${x.n_antworten}`).join('<br>') : ''));
+    g.onclick=()=>openDetail(k);
+  });
+}
+
+function renderKommentare(kurse){
+  const host=document.getElementById('c-kommentare'), items=[];
+  kurse.forEach(k=>k.kommentare.forEach(c=>{
+    if(S.ton.size && !S.ton.has(c.tonalitaet)) return;
+    if(S.thema.size && !S.thema.has(c.thema_cluster)) return;
+    items.push({k,c});
+  }));
+  if(!items.length){ host.innerHTML='<p class="empty">Keine Kommentare für diese Auswahl.</p>'; return; }
+  const order={kritisch:0,neutral:1,positiv:2};
+  items.sort((a,b)=>order[a.c.tonalitaet]-order[b.c.tonalitaet] || a.k.kurs.localeCompare(b.k.kurs,'de'));
+  host.innerHTML=items.map(({k,c})=>
+    `<div class="cmt ${c.tonalitaet}">
+       <div class="meta"><b>${esc(k.kurs)}</b><span>${esc(k.saison)}</span><span>${esc(k.kategorie)}</span>
+       <span class="tag">${esc(c.thema_cluster)}</span><span class="tag plain">${esc(c.thema||'–')}</span></div>
+       <div class="txt">${esc(c.text)}</div>
+     </div>`).join('');
+}
+
+const COLS=[
+  ['kurs','Kurs',0],['kurs_code','Code',0],['saison','Kursjahr',0],['kategorie','Typ',0],['sportart','Sportart',0],
+  ['n_antworten','Rückm.',1],['gesamt','Gesamt',1],['score_kern','Kern',1],['score_modul','Module',1],
+  ['score_orga','Orga-Detail',1],['anteil_kritisch','% Note 1–2',1],['anteil_top','% Note 5',1]
+];
+function renderTable(kurse){
+  const t=document.getElementById('t-kurse');
+  t.tHead.innerHTML='<tr>'+COLS.map(([k,l,n])=>`<th class="${n?'num':''}" data-k="${k}">${l}${S.tsort===k?(S.tdir<0?' ▾':' ▴'):''}</th>`).join('')+'</tr>';
+  t.tHead.querySelectorAll('th').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k; if(S.tsort===k) S.tdir*=-1; else {S.tsort=k;S.tdir=-1;} render();
+  });
+  const list=[...kurse].sort((a,b)=>{
+    const x=a[S.tsort], y=b[S.tsort];
+    if(typeof x==='string'||typeof y==='string') return String(x).localeCompare(String(y),'de')*(S.tdir<0?-1:1);
+    return ((y??-1)-(x??-1))*(S.tdir<0?1:-1);
+  });
+  t.tBodies[0].innerHTML=list.map(k=>'<tr>'+COLS.map(([c,,n])=>{
+    let v=k[c];
+    if(v==null) v='–'; else if(n && typeof v==='number') v=(c==='n_antworten')? v : nf(v, c.startsWith('anteil')?1:2);
+    return `<td class="${n?'num':''}">${esc(v)}</td>`;
+  }).join('')+'</tr>').join('');
+}
+
+function openDetail(k){
+  document.getElementById('dlg-title').innerHTML=
+    `<h3>${esc(k.kurs)}</h3><div class="s">${esc([k.kurs_code,k.datum_text].filter(Boolean).join(' · ')||'ohne Kurscode')}</div>
+     <div class="pillrow"><span class="pill">${esc(k.saison)}</span><span class="pill">${esc(k.kategorie)}</span><span class="pill">${esc(k.sportart)}</span><span class="pill">${k.n_antworten} Rückmeldungen</span><span class="pill">Ø ${nf(k.gesamt)}</span></div>`;
+  const body=document.getElementById('dlg-body');
+  body.innerHTML='<div id="dlg-bars"></div>';
+  const grp={kern:'Kerndimensionen',modul:'Inhaltliche Module',orga_detail:'Organisation im Detail'};
+  const rows=[];
+  ['kern','modul','orga_detail'].forEach(t=>{
+    const ds=k.dimensionen.filter(d=>d.typ===t);
+    if(!ds.length) return;
+    rows.push({gruppe:grp[t]});
+    ds.forEach(d=>rows.push({label:d.name,wert:d.mittelwert,n:d.n,
+      tip:`<b>${esc(d.name)}</b><br>Ø ${nf(d.mittelwert)} von 5 · n=${d.n}<br>`+[5,4,3,2,1].map(i=>`Note ${i}: ${d.verteilung[i]||0}`).join(' · ')}));
+  });
+  barChart(document.getElementById('dlg-bars'),rows,{labw:270});
+  if(k.hinweise) body.insertAdjacentHTML('beforeend',`<h4>Hinweis zur Quelldatei</h4><p class="note" style="margin:0">${esc(k.hinweise)}</p>`);
+  if(k.kommentare.length){
+    body.insertAdjacentHTML('beforeend',`<h4>Kommentare (${k.kommentare.length})</h4><div class="cmts" style="max-height:none">`+
+      k.kommentare.map(c=>`<div class="cmt ${c.tonalitaet}"><div class="meta"><span class="tag">${esc(c.thema_cluster)}</span><span class="tag plain">${esc(c.thema||'–')}</span></div><div class="txt">${esc(c.text)}</div></div>`).join('')+`</div>`);
+  }
+  document.getElementById('detail').showModal();
+}
+
+function csv(){
+  const kurse=filtered();
+  const head=COLS.map(c=>c[1]).join(';');
+  const body=kurse.map(k=>COLS.map(([c])=>{
+    let v=k[c]; if(v==null) return '';
+    if(typeof v==='number') return String(v).replace('.',',');
+    return '"'+String(v).replace(/"/g,'""')+'"';
+  }).join(';')).join('\n');
+  const content='\ufeff'+head+'\n'+body, name='kursfeedback_auswertung.csv';
+  // Auf claude.ai (Artifact) laeuft der Download ueber die downloads-Capability,
+  // als lokale Datei ueber einen normalen Download-Link.
+  if(window.claude && typeof window.claude.use==='function'){
+    window.claude.use('downloads').then(dl=>{
+      if(!dl){ csvFallback(content,name); return; }
+      return dl.save({filename:name,data:content}).catch(e=>{
+        if(e && e.code!=='declined') console.warn('CSV-Export nicht moeglich:',e.code);
+      });
+    });
+    return;
+  }
+  csvFallback(content,name);
+}
+function csvFallback(content,name){
+  const blob=new Blob([content],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name; a.click();
+}
+
+function buildKursSelect(){
+  const sel=document.getElementById('f-kurs');
+  const namen={};
+  DATA.kurse.forEach(k=>{ (namen[k.kurs] ||= []).push(k); });
+  const opts=Object.keys(namen).sort((a,b)=>a.localeCompare(b,'de'));
+  sel.innerHTML='<option value="">Alle Kurse ('+DATA.kurse.length+')</option>'+
+    opts.map(n=>{
+      const ks=namen[n], det=ks.length>1? ks.length+' Durchführungen' : (ks[0].kurs_code||ks[0].saison);
+      return `<option value="${n.replace(/"/g,'&quot;')}">${n} – ${det}</option>`;
+    }).join('');
+  sel.value=S.kurs;
+  sel.classList.toggle('on', !!S.kurs);
+}
+function buildCommentFilters(){
+  const themen=[...new Set(DATA.kurse.flatMap(k=>k.kommentare.map(c=>c.thema_cluster)))].sort((a,b)=>a.localeCompare(b,'de'));
+  chips(document.getElementById('f-ton'),['kritisch','positiv','neutral'],S.ton,render);
+  chips(document.getElementById('f-thema'),themen,S.thema,render);
+}
+function render(){
+  const k=filtered(), s=summary(k);
+  const sel=document.getElementById('f-kurs'); if(sel){ sel.value=S.kurs; sel.classList.toggle('on', !!S.kurs); }
+  renderKPIs(s); renderScatter(k); renderMatrix(k); renderDims(k); renderVerteilung(k);
+  renderKurse(k); renderKommentare(k); renderTable(k);
+}
+function wire(){
+document.getElementById('f-kurs').onchange=e=>{S.kurs=e.target.value;render();};
+radio(document.getElementById('sortopts'),[['note','Beste zuerst'],['note_asc','Tiefste zuerst'],['kritisch','Meiste Note 1–2'],['n','Meiste Rückmeldungen'],['datum','Neueste zuerst'],['datum_asc','Älteste zuerst'],['name','Alphabetisch']],'sort',render);
+radio(document.getElementById('mxopts'),[['sportart','nach Sportart'],['kategorie','nach Kurstyp']],'mx',render);
+document.getElementById('reset').onclick=()=>{
+  S.saison.clear();S.sportart.clear();S.ton.clear();S.thema.clear();S.kurs='';
+  chips(document.getElementById('f-saison'),DATA.meta.saisons,S.saison,render);
+  chips(document.getElementById('f-sportart'),DATA.meta.sportarten,S.sportart,render);
+  buildKursSelect(); buildCommentFilters(); render();
+};
+document.getElementById('csv').onclick=csv;
+document.getElementById('dlg-close').onclick=()=>document.getElementById('detail').close();
+}
+
+function boot(){
+  // Oeffentliche Version (GitHub Pages): ohne Freitextkommentare
+  if(DATA.meta.oeffentlich){
+    document.getElementById('sec-kommentare').hidden=true;
+    liveStatus('Öffentliche Version – Kennzahlen ohne Freitextkommentare.', true);
+  }
+  document.getElementById('stand').textContent = BUILD;
+  document.getElementById('saisonrange').textContent = DATA.meta.saisons.join(' – ');
+  // Filter, die es im neuen Datenstand nicht mehr gibt, verwerfen
+  [...S.saison].forEach(x=>{ if(!DATA.meta.saisons.includes(x)) S.saison.delete(x); });
+  [...S.sportart].forEach(x=>{ if(!DATA.meta.sportarten.includes(x)) S.sportart.delete(x); });
+  if(S.kurs && !DATA.kurse.some(k=>k.kurs===S.kurs)) S.kurs='';
+  chips(document.getElementById('f-saison'),DATA.meta.saisons,S.saison,render);
+  chips(document.getElementById('f-sportart'),DATA.meta.sportarten,S.sportart,render);
+  buildKursSelect(); buildCommentFilters();
+  if(!boot.wired){ wire(); boot.wired=true; }
+  render();
+}
+
+// Kennzahlen je Kursjahr und Metadaten aus den Kursen ableiten (gleiche Logik wie build.py)
+function derive(kurse){
+  const sorted=[...kurse].sort((a,b)=>(a.saison+'|'+a.kategorie+'|'+a.kurs).localeCompare(b.saison+'|'+b.kategorie+'|'+b.kurs,'de'));
+  const saisons=[...new Set(sorted.map(k=>k.saison))].sort();
+  const agg=items=>{
+    let n=0,tot=0,krit=0,sw=0,w=0;
+    items.forEach(k=>{
+      n+=k.n_antworten||0;
+      k.dimensionen.forEach(d=>{ const v=d.verteilung||{}; for(let i=1;i<=5;i++){ tot+=v[i]||0; if(i<=2) krit+=v[i]||0; } });
+      if(k.gesamt!=null && k.n_antworten){ sw+=k.gesamt*k.n_antworten; w+=k.n_antworten; }
+    });
+    return {kurse:items.length, antworten:n, bewertungen:tot,
+            gesamt: w? Math.round(sw/w*100)/100 : null,
+            anteil_kritisch: tot? Math.round(krit/tot*1000)/10 : null};
+  };
+  const je={}; saisons.forEach(s=>je[s]=agg(sorted.filter(k=>k.saison===s)));
+  return {meta:{saisons, sportarten:[...new Set(sorted.map(k=>k.sportart))].sort((a,b)=>a.localeCompare(b,'de')),
+                kurse_total:sorted.length, antworten_total:sorted.reduce((s,k)=>s+(k.n_antworten||0),0)},
+          je_saison:je, kurse:sorted};
+}
+
+function liveStatus(text, ok){
+  const el=document.getElementById('livestatus');
+  el.textContent=text; el.classList.toggle('ok',!!ok); el.hidden=!text;
+}
+
+async function liveLoad(){
+  liveStatus('Kursdaten werden geladen …');
+  let db=null;
+  try{ db = window.claude && typeof window.claude.use==='function' ? await window.claude.use('db') : null; }catch(e){ db=null; }
+  if(!db){ liveStatus('Die Kursdaten sind in dieser Ansicht nicht verfügbar. Bitte auf claude.ai angemeldet öffnen.'); return; }
+  let kurseDocs=null, stand=null, confirmed=false;
+  const timer=setTimeout(()=>{ if(!confirmed) liveStatus(kurseDocs? 'Verbindung langsam – die angezeigten Daten sind evtl. nicht aktuell.' : 'Die Kursdaten sind noch nicht erreichbar. Es wird weiter versucht …'); },10000);
+  const apply=()=>{
+    if(!kurseDocs) return;
+    if(!kurseDocs.length){ liveStatus('Noch keine Kursdaten vorhanden.'); return; }
+    DATA=derive(kurseDocs); BUILD=stand||'–';
+    boot();
+  };
+  db.collection('kurse').onSnapshot(snap=>{
+    kurseDocs=snap.docs.map(d=>d.data()).filter(x=>x&&x.kurs).map(x=>x.kurs);
+    if(!snap.metadata.fromCache){ confirmed=true; clearTimeout(timer); liveStatus('Live – aktualisiert sich automatisch, wenn neue Kurse ausgewertet sind.', true); }
+    apply();
+  }, e=>{ clearTimeout(timer); liveStatus('Die Kursdaten konnten nicht geladen werden ('+e.code+').'); });
+  db.doc('meta/stand').onSnapshot(s=>{ const d=s.exists? s.data():null; stand=d&&d.stand||null; if(DATA){ BUILD=stand||'–'; document.getElementById('stand').textContent=BUILD; } },()=>{});
+}
+
+if(DATA) boot(); else liveLoad();
+</script>
+</body>
+</html>
